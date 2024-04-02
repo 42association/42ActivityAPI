@@ -2,13 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
-
+	
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -17,50 +18,6 @@ type Token struct {
 	AccessToken string `json:"access_token"`
 	TokenType   string `json:"token_type"`
 	ExpiresIn   int    `json:"expires_in"`
-}
-
-func main() {
-	router := gin.Default()
-
-	
-	// テンプレートエンジンの設定
-	router.LoadHTMLGlob("templates/*") // HTMLテンプレートのパスを指定
-	
-	router.GET("/", func(c *gin.Context) {
-		
-		// .envファイルの読み込みエラー処理
-		if err := godotenv.Load(); err != nil {
-			log.Fatal("Error loading .env file")
-		}
-		
-		UID := os.Getenv("UID")
-			CALLBACK_URL := os.Getenv("CALLBACK_URL")
-		// 環境変数が設定されていない場合の処理
-		if UID == "" || CALLBACK_URL == "" {
-			c.String(http.StatusInternalServerError, "UID or CALLBACK_URL not set")
-			return
-		}
-
-		c.HTML(http.StatusOK, "index.html", gin.H{
-			"UID":          UID,
-			"CALLBACK_URL": CALLBACK_URL,
-		})
-	})
-
-	router.GET("/callback", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "callback.html", nil)
-	})
-
-	router.GET("/:uid", redirectToIndexWithUID)
-
-	router.POST("/receive-uid", handleRoot)
-
-	router.Run(":8080")
-}
-
-func redirectToIndexWithUID(c *gin.Context) {
-	uid := c.Param("uid")
-	c.Redirect(http.StatusMovedPermanently, "/?uid="+uid)
 }
 
 // リクエストデータの構造を定義
@@ -73,8 +30,64 @@ type UserData struct {
 	IntraName string `json:"intra_name"`
 }
 
+type Config struct {
+	UID         string
+	Secret      string
+	CallbackURL string
+}
+
+func main() {
+	router := gin.Default()
+	
+	router.LoadHTMLGlob("templates/*")
+
+	router.GET("/", ShowIndexPage)
+	router.GET("/callback", ShowCallbackPage)
+	router.GET("/:uid", RedirectToIndexWithUID)
+	router.POST("/receive-uid", HandleUIDSubmission)
+
+	router.Run(":8000")
+}
+
+// 環境変数の読み込み
+func LoadConfig() (*Config, error) {
+	if err := godotenv.Load(); err != nil {
+		return nil, fmt.Errorf("error loading .env file: %v", err)
+	}
+	config := &Config{
+		UID:         os.Getenv("UID"),
+		Secret:      os.Getenv("SECRET"),
+		CallbackURL: os.Getenv("CALLBACK_URL"),
+	}
+	if config.UID == "" || config.Secret == "" || config.CallbackURL == "" {
+		return nil, errors.New("one or more required environment variables are not set")
+	}
+	return config, nil
+}
+
+func ShowIndexPage(c *gin.Context) {
+	config, err := LoadConfig()
+	if err != nil {
+		log.Fatalf("Failed to load configuration: %v\n", err)
+	}
+
+	c.HTML(http.StatusOK, "index.html", gin.H{
+		"UID":          config.UID,
+		"CALLBACK_URL": config.CallbackURL,
+	})
+}
+
+func RedirectToIndexWithUID(c *gin.Context) {
+	uid := c.Param("uid")
+	c.Redirect(http.StatusMovedPermanently, "/?uid="+uid)
+}
+
+func ShowCallbackPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "callback.html", nil)
+}
+
 // handleRoot関数内でfetchUserDataから返されるintraLoginをレスポンスとして返す
-func handleRoot(c *gin.Context) {
+func HandleUIDSubmission(c *gin.Context) {
 	var requestData RequestData
 
 	// JSONリクエストボディを解析してrequestDataに格納
@@ -97,7 +110,7 @@ func handleRoot(c *gin.Context) {
 			// 取得したuserDataを含めてレスポンスを返す
 			c.JSON(http.StatusOK, gin.H{
 				// "code": requestData.Code,
-				 "uid": requestData.Uid, "intra_login": userData.IntraName})
+				"uid": requestData.Uid, "intra_login": userData.IntraName})
 			return
 		}
 		c.JSON(http.StatusOK, nil)
@@ -109,16 +122,13 @@ func handleRoot(c *gin.Context) {
 
 func exchangeCodeForToken(code string) *Token {
 
-	// .envファイルの読み込みエラー処理
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
+	config, err := LoadConfig()
+	if err != nil {
+		log.Fatalf("Failed to load configuration: %v\n", err)
 	}
-	UID := os.Getenv("UID")
-	SECRET := os.Getenv("SECRET")
-	CALLBACK_URL := os.Getenv("CALLBACK_URL")
 
 	tokenURL := fmt.Sprintf("https://api.intra.42.fr/oauth/token?grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s&redirect_uri=%s",
-		UID, SECRET, code, url.QueryEscape(CALLBACK_URL))
+		config.UID, config.Secret, code, url.QueryEscape(config.CallbackURL))
 
 	resp, err := http.PostForm(tokenURL, url.Values{})
 	if err != nil {
