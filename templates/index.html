@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Index Page</title>
+</head>
+<body>
+    <script>
+        window.onload = function() {
+            // URLからuidを取得
+            const urlParams = new URLSearchParams(window.location.search);
+            const uid = urlParams.get('uid');
+
+            // uidがあればlocalStorageに保存
+            if (uid) {
+                localStorage.setItem('uid', uid);
+            }
+
+            // サーバーから渡される値を使用
+            const clientId = "{{.UID}}";
+            const redirectUri = "{{.CALLBACK_URL}}";
+            const authURL = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
+
+            // 認証URLにリダイレクト
+            window.location.href = authURL;
+        };
+    </script>
+</body>
+</html>

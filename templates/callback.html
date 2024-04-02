@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    callback
+    <div id="responseOutput"></div> <!-- 応答を表示するための要素 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // URLからクエリパラメータを取得するための関数
+            function getQueryParam(param) {
+                var searchParams = new URLSearchParams(window.location.search);
+                return searchParams.get(param);
+            }
+
+            var uid = localStorage.getItem('uid');
+            var code = getQueryParam('code'); // URLからcodeクエリパラメータを取得
+
+            // UIDとCODEが存在する場合のみ実行
+            if (uid && code) {
+                // Fetch APIを使用してサーバーにUIDとCODEを送信
+                fetch('/receive-uid', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ uid, code }), // ここでCODEを含める
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log({message:"test",data});
+                    // 応答をHTML要素に出力
+                    document.getElementById('responseOutput').innerText = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('responseOutput').innerText = 'Error: ' + error.toString();
+                });
+            }
+        });
+    </script>        
+</body>
+</html>
