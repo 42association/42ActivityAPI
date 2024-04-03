@@ -66,7 +66,7 @@ func GetUserByUid(db *sql.DB, uid string) (User, error) {
 	query := "SELECT id, uid, login FROM users WHERE uid = ?"
 	err := db.QueryRow(query, uid).Scan(&user)
 	if err != nil {
-		return nil, err
+		return user, err
 	}
 	return user, nil
 }
