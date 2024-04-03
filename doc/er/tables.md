@@ -25,7 +25,7 @@ erDiagram
     M5STICK ||--o{ ACTIVITY : activity
     M5STICK {
         int id
-        string uid
+        string mac
         int role_id
         int location_id
     }
