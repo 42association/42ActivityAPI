@@ -5,6 +5,7 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"os"
+	"time"
 )
 
 // InitializeDatabase はデータベース接続の初期化を行います。
@@ -80,6 +81,16 @@ func GetM5StickByMac(db *sql.DB, mac string) (M5Stick, error) {
 	return m5Stick, nil
 }
 
+func InsertActivity(db *sql.DB, user_id, m5Stick_id string) error {
+	ts := time.Now().Unix()
+	query := "INSERT INTO activities (user_id, m5stick_id, timestamp) VALUES ($1, $2, $3)"
+	_, err := db.Exec(query, user_id, m5Stick_id, ts)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Inserted a new activity into the activities table.")
+	return nil
+}
 
 // GetUsers はusersテーブルから全てのユーザーを取得し、表示します。
 func GetUsers(db *sql.DB) ([]User, error) {
