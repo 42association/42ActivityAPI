@@ -76,7 +76,7 @@ func GetM5StickByMac(db *sql.DB, mac string) (M5Stick, error) {
 	query := "SELECT id, mac FROM m5sticks WHERE mac = ?"
 	err := db.QueryRow(query, mac).Scan(&m5Stick.ID, &m5Stick.Mac)
 	if err != nil {
-		return nil, err
+		return m5Stick, err
 	}
 	return m5Stick, nil
 }
