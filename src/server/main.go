@@ -211,8 +211,6 @@ func fetchUserData(accessToken string) (*UserData, error) {
 
 func addActivity(c *gin.Context) {
 	var requestData ActivityRequestData
-	var user User
-	var m5stick M5Stick
 	
 	// JSONリクエストボディを解析してrequestDataに格納
 	if err := c.BindJSON(&requestData); err != nil {
