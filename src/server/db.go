@@ -81,7 +81,7 @@ func GetM5StickByMac(db *sql.DB, mac string) (M5Stick, error) {
 	return m5Stick, nil
 }
 
-func InsertActivity(db *sql.DB, user_id, m5Stick_id string) error {
+func InsertActivity(db *sql.DB, user_id, m5Stick_id int) error {
 	ts := time.Now().Unix()
 	query := "INSERT INTO activities (user_id, m5stick_id, timestamp) VALUES ($1, $2, $3)"
 	_, err := db.Exec(query, user_id, m5Stick_id, ts)
