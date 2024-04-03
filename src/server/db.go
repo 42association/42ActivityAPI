@@ -64,7 +64,7 @@ func InsertUser(db *sql.DB, uid, login string) error {
 func GetUserByUid(db *sql.DB, uid string) (User, error) {
 	var user User
 	query := "SELECT id, uid, login FROM users WHERE uid = ?"
-	err := db.QueryRow(query, uid).Scan(&user)
+	err := db.QueryRow(query, uid).Scan(&user.ID, &user.UID, &user.Login)
 	if err != nil {
 		return user, err
 	}
