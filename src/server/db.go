@@ -74,7 +74,7 @@ func GetUserByUid(db *sql.DB, uid string) (User, error) {
 func GetM5StickByMac(db *sql.DB, mac string) (M5Stick, error) {
 	var m5Stick M5Stick
 	query := "SELECT id, mac FROM m5sticks WHERE mac = ?"
-	err := db.QueryRow(query, mac).Scan(&m5Stick)
+	err := db.QueryRow(query, mac).Scan(&m5Stick.ID, &m5Stick.Mac)
 	if err != nil {
 		return nil, err
 	}
