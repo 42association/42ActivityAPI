@@ -60,6 +60,16 @@ func InsertUser(db *sql.DB, uid, login string) error {
 	return nil
 }
 
+func GetUserByUid(db *sql.DB, uid string) (User, error) {
+	var user User
+	query := "SELECT id, uid, login FROM users WHERE uid = $1"
+	err := db.QueryRow(query, uid).Scan(&user)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 // GetUsers はusersテーブルから全てのユーザーを取得し、表示します。
 func GetUsers(db *sql.DB) ([]User, error) {
 	rows, err := db.Query("SELECT id, uid, login FROM users")
