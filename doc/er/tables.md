@@ -7,7 +7,7 @@ erDiagram
     USER {
         int id
         string uid
-        string intra
+        string login
     }
 
     LOCATION ||--o| M5STICK : setup
