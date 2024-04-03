@@ -70,6 +70,17 @@ func GetUserByUid(db *sql.DB, uid string) (User, error) {
 	return user, nil
 }
 
+func GetM5StickByMac(db *sql.DB, mac string) (M5Stick, error) {
+	var m5Stick M5Stick
+	query := "SELECT id, mac, login FROM m5sticks WHERE uid = $1"
+	err := db.QueryRow(query, mac).Scan(&m5Stick)
+	if err != nil {
+		return nil, err
+	}
+	return m5Stick, nil
+}
+
+
 // GetUsers はusersテーブルから全てのユーザーを取得し、表示します。
 func GetUsers(db *sql.DB) ([]User, error) {
 	rows, err := db.Query("SELECT id, uid, login FROM users")
