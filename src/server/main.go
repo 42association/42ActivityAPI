@@ -208,3 +208,36 @@ func fetchUserData(accessToken string) (*UserData, error) {
 
 	return &UserData{IntraName: intraName}, nil
 }
+
+func addActivity(c *gin.Context) {
+	var requestData ActivityRequestData
+	var user User
+	var m5stick M5Stick
+	
+	// JSONリクエストボディを解析してrequestDataに格納
+	if err := c.BindJSON(&requestData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	// requestDataが空でないことを確認（MacとUidが非空の文字列）
+	if requestData.Mac == "" || requestData.Uid == "" {
+		// パラメータが空の場合はnullを返す
+		c.JSON(http.StatusOK, nil)
+		return
+	}
+	db, err := InitializeDatabase()
+	if err != nil {
+		log.Fatal("Failed to initialize database:", err)
+	}
+	defer db.Close()
+	user := GetUserByUid(db, requestData.Uid)
+	m5Stick := GetM5StickByMac(db, requestData.Mac)
+	// Add a new activity
+	if err := InsertActivity(db, m5Stick.id, user.id); err != nil {
+		log.Fatalf("Failed to insert user: %v", err)
+	}
+	// 取得したuserDataを含めてレスポンスを返す
+	c.JSON(http.StatusOK, gin.H{
+		"uid": requestData.Uid, "mac": requestData.Mac})
+	return
+}
