@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	
+
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -38,12 +38,12 @@ type Config struct {
 
 func main() {
 	router := gin.Default()
-	
+
 	router.LoadHTMLGlob("templates/*")
 
 	router.GET("/", ShowIndexPage)
-	router.GET("/callback", ShowCallbackPage)
 	router.GET("/:uid", RedirectToIndexWithUID)
+	router.GET("/callback", ShowCallbackPage)
 	router.POST("/receive-uid", HandleUIDSubmission)
 
 	router.Run(":8000")
@@ -106,6 +106,17 @@ func HandleUIDSubmission(c *gin.Context) {
 				// エラーハンドリング
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user data"})
 				return
+			}
+
+			db, err := InitializeDatabase()
+			if err != nil {
+				log.Fatal("Failed to initialize database:", err)
+			}
+			defer db.Close()
+		
+			// 新しいユーザーを挿入
+			if err := InsertUser(db, requestData.Uid, userData.IntraName); err != nil {
+				log.Fatalf("Failed to insert user: %v", err)
 			}
 			// 取得したuserDataを含めてレスポンスを返す
 			c.JSON(http.StatusOK, gin.H{

@@ -28,6 +28,13 @@ services:
       TZ: 'Asia/Tokyo'
     healthcheck:
       test: mariadb-check --databases $MARIADB_DATABASE -u $MARIADB_USER -p$MARIADB_PASSWORD
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - docker-network
 networks:
   docker-network:
     driver: bridge
