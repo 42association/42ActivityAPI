@@ -122,3 +122,11 @@ type User struct {
 	UID   string
 	Login string
 }
+
+// M5Stick はm5Stickテーブルの行を表す構造体です。
+type M5Stick struct {
+	ID    int
+	Mac   string
+	RoleId int
+	LocationId int
+}
