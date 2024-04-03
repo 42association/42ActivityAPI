@@ -225,7 +225,9 @@ func addActivity(c *gin.Context) {
 	}
 	db, err := InitializeDatabase()
 	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		log.Fatal("Failed to initialize database:", err)
+		return
 	}
 	defer db.Close()
 	user := GetUserByUid(db, requestData.Uid)
