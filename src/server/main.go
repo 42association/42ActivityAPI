@@ -26,6 +26,11 @@ type RequestData struct {
 	Uid  string `json:"uid"`
 }
 
+type ActivityRequestData struct {
+	Mac string `json:"mac"`
+	Uid string `json:"uid"`
+}
+
 type UserData struct {
 	IntraName string `json:"intra_name"`
 }
