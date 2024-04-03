@@ -1,4 +1,4 @@
-# User table
+# Tables
 
 ```mermaid
 erDiagram
