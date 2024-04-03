@@ -243,8 +243,10 @@ func addActivity(c *gin.Context) {
 		return
 	}
 	// Add a new activity
-	if err := InsertActivity(db, m5Stick.id, user.id); err != nil {
-		log.Fatalf("Failed to insert user: %v", err)
+	if err := InsertActivity(db, m5Stick.ID, user.ID); err != nil {
+		log.Fatalf("Failed to insert activity: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 	// 取得したuserDataを含めてレスポンスを返す
 	c.JSON(http.StatusOK, gin.H{
