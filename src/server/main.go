@@ -230,8 +230,18 @@ func addActivity(c *gin.Context) {
 		return
 	}
 	defer db.Close()
-	user := GetUserByUid(db, requestData.Uid)
-	m5Stick := GetM5StickByMac(db, requestData.Mac)
+	user, errUser := GetUserByUid(db, requestData.Uid)
+	if errUser != nil {
+		log.Fatal("Failed to get user:", errUser)
+		c.JSON(http.StatusBadRequest, gin.H{"error": errUser.Error()})
+		return
+	}
+	m5Stick, errM5Stick := GetM5StickByMac(db, requestData.Mac)
+	if errM5Stick != nil {
+		log.Fatal("Failed to get M5Stick:", errM5Stick)
+		c.JSON(http.StatusBadRequest, gin.H{"error": errM5Stick.Error()})
+		return
+	}
 	// Add a new activity
 	if err := InsertActivity(db, m5Stick.id, user.id); err != nil {
 		log.Fatalf("Failed to insert user: %v", err)
