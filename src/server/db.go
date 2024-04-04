@@ -5,6 +5,7 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"os"
+	"time"
 )
 
 // InitializeDatabase はデータベース接続の初期化を行います。
@@ -60,6 +61,37 @@ func InsertUser(db *sql.DB, uid, login string) error {
 	return nil
 }
 
+func GetUserByUid(db *sql.DB, uid string) (User, error) {
+	var user User
+	query := "SELECT id, uid, login FROM users WHERE uid = ?"
+	err := db.QueryRow(query, uid).Scan(&user.ID, &user.UID, &user.Login)
+	if err != nil {
+		return user, err
+	}
+	return user, nil
+}
+
+func GetM5StickByMac(db *sql.DB, mac string) (M5Stick, error) {
+	var m5Stick M5Stick
+	query := "SELECT id, mac FROM m5sticks WHERE mac = ?"
+	err := db.QueryRow(query, mac).Scan(&m5Stick.ID, &m5Stick.Mac)
+	if err != nil {
+		return m5Stick, err
+	}
+	return m5Stick, nil
+}
+
+func InsertActivity(db *sql.DB, user_id, m5Stick_id int) error {
+	ts := time.Now().Unix()
+	query := "INSERT INTO activities (user_id, m5stick_id, timestamp) VALUES ($1, $2, $3)"
+	_, err := db.Exec(query, user_id, m5Stick_id, ts)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Inserted a new activity into the activities table.")
+	return nil
+}
+
 // GetUsers はusersテーブルから全てのユーザーを取得し、表示します。
 func GetUsers(db *sql.DB) ([]User, error) {
 	rows, err := db.Query("SELECT id, uid, login FROM users")
@@ -89,4 +121,12 @@ type User struct {
 	ID    int
 	UID   string
 	Login string
+}
+
+// M5Stick はm5Stickテーブルの行を表す構造体です。
+type M5Stick struct {
+	ID    int
+	Mac   string
+	RoleId int
+	LocationId int
 }

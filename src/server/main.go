@@ -26,6 +26,11 @@ type RequestData struct {
 	Uid  string `json:"uid"`
 }
 
+type ActivityRequestData struct {
+	Mac string `json:"mac"`
+	Uid string `json:"uid"`
+}
+
 type UserData struct {
 	IntraName string `json:"intra_name"`
 }
@@ -45,6 +50,7 @@ func main() {
 	router.GET("/:uid", RedirectToIndexWithUID)
 	router.GET("/callback", ShowCallbackPage)
 	router.POST("/receive-uid", HandleUIDSubmission)
+	router.POST("/activity/add", addActivity)
 
 	router.Run(":8000")
 }
@@ -201,4 +207,49 @@ func fetchUserData(accessToken string) (*UserData, error) {
 	}
 
 	return &UserData{IntraName: intraName}, nil
+}
+
+func addActivity(c *gin.Context) {
+	var requestData ActivityRequestData
+	
+	// JSONリクエストボディを解析してrequestDataに格納
+	if err := c.BindJSON(&requestData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	// requestDataが空でないことを確認（MacとUidが非空の文字列）
+	if requestData.Mac == "" || requestData.Uid == "" {
+		// パラメータが空の場合はnullを返す
+		c.JSON(http.StatusOK, nil)
+		return
+	}
+	db, err := InitializeDatabase()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Fatal("Failed to initialize database:", err)
+		return
+	}
+	defer db.Close()
+	user, errUser := GetUserByUid(db, requestData.Uid)
+	if errUser != nil {
+		log.Fatal("Failed to get user:", errUser)
+		c.JSON(http.StatusBadRequest, gin.H{"error": errUser.Error()})
+		return
+	}
+	m5Stick, errM5Stick := GetM5StickByMac(db, requestData.Mac)
+	if errM5Stick != nil {
+		log.Fatal("Failed to get M5Stick:", errM5Stick)
+		c.JSON(http.StatusBadRequest, gin.H{"error": errM5Stick.Error()})
+		return
+	}
+	// Add a new activity
+	if err := InsertActivity(db, m5Stick.ID, user.ID); err != nil {
+		log.Fatalf("Failed to insert activity: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	// 取得したuserDataを含めてレスポンスを返す
+	c.JSON(http.StatusOK, gin.H{
+		"uid": requestData.Uid, "mac": requestData.Mac})
+	return
 }
