@@ -105,7 +105,7 @@ func getCleanData(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid time range"})
 	}
 
-	rows, err := db.Query("SELECT * FROM ACTIVITY WHERE time_stamp >= ? AND time_stamp <= ?", startInt, endInt)
+	rows, err := db.Query("SELECT * FROM activities WHERE timestamp >= ? AND timestamp <= ?", startInt, endInt)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Database query failed", "message": err})
         return
