@@ -114,12 +114,9 @@ func connectToDB() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		return nil, err
-	}
-	return db, nil
+	db.AutoMigrate(&User{})
+	db.AutoMigrate(&M5Stick{})
+	return db.DB()
 }
 
 // getDSN はDSN（Data Source Name）を環境変数から取得します。
