@@ -68,6 +68,7 @@ func connectToDB() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
