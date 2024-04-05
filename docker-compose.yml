@@ -12,6 +12,9 @@ services:
       - docker-network
     environment:
       DSN: ${DSN}
+      UID: ${UID}
+      CALLBACK_URL: ${CALLBACK_URL}
+      SECRET: ${SECRET}
     depends_on:
       mariadb:
         condition: service_healthy
