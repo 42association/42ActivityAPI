@@ -11,8 +11,6 @@ import (
 	"os"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-
-	"strconv"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -43,13 +41,6 @@ type Config struct {
 	CallbackURL string
 }
 
-type Activity struct {
-	id		 int    `json:"id"`
-	user_id   int    `json:"user_id"`
-	m5stick_id int `json:"m5stick_id"`
-	timestamp string `json:"time_stamp"`
-}
-
 func main() {
 	db, err := initializeDB();
 	if err != nil {
@@ -67,13 +58,13 @@ func main() {
 	router.POST("/receive-uid", HandleUIDSubmission)
 	router.POST("/activity/add", addActivity)
 
-	router.GET("/activity/cleanings", getCleanData)
+	router.GET("/activity/cleanings", getCleanDataHandler)
 
 	router.Run(":8000")
 }
 
 //cleanings?start=[UNIXtime]&end=[UNIXtime]
-func getCleanData(c *gin.Context) {
+func getCleanDataHandler(c *gin.Context) {
 	dsn, err := getDSN()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "DSN environment variable is not set"})
@@ -85,51 +76,13 @@ func getCleanData(c *gin.Context) {
 		return
 	}
 	defer db.Close()
-
-	start := c.Query("start")
-    end := c.Query("end")
-
-	startInt, err := strconv.ParseInt(start, 10, 64)
-    if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid start timestamp"})
-        return
-    }
-
-    endInt, err := strconv.ParseInt(end, 10, 64)
-    if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid end timestamp"})
-        return
-    }
-
-	if startInt > endInt {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid time range"})
+	Activitys, err := getCleanData(c, db)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get clean data"})
+		return
 	}
-
-	rows, err := db.Query("SELECT * FROM activities WHERE timestamp >= ? AND timestamp <= ?", startInt, endInt)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "Database query failed", "message": err})
-        return
-    }
-    defer rows.Close()
-
-    // Scan the rows into a slice
-    var Activitys []Activity
-    for rows.Next() {
-		var activity Activity
-        err := rows.Scan(&activity.id, &activity.user_id, &activity.m5stick_id, &activity.timestamp)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan row", "message": err})
-            return
-		}
-		Activitys = append(Activitys, Activity{
-			id: activity.id,
-			user_id: activity.user_id,
-			m5stick_id: activity.m5stick_id,
-			timestamp: activity.timestamp,
-		})
-    }
 	log.Println(Activitys)
-	c.HTML(200, "index.html", gin.H{"Activitys": Activitys})
+	c.HTML(http.StatusOK, "index.html", gin.H{"Activitys": Activitys})
 }
 
 // 環境変数の読み込み
