@@ -213,6 +213,7 @@ func GetUsers(db *sql.DB) ([]User, error) {
 	return users, nil
 }
 
+// getCleanData はデータベースから条件に合う掃除データを取得します。/cleanings?start=[UNIXtime]&end=[UNIXtime]
 func getCleanData(c *gin.Context, db *sql.DB) ([]Activity, error) {
 	start := c.Query("start")
     end := c.Query("end")
