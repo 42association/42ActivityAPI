@@ -6,6 +6,9 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"os"
 	"time"
+	"strconv"
+	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 // InitializeDatabase はデータベース接続の初期化を行います。
@@ -116,6 +119,53 @@ func GetUsers(db *sql.DB) ([]User, error) {
 	return users, nil
 }
 
+func getCleanData(c *gin.Context, db *sql.DB) ([]Activity, error) {
+	start := c.Query("start")
+    end := c.Query("end")
+
+	startInt, err := strconv.ParseInt(start, 10, 64)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid start timestamp"})
+        return nil, err
+    }
+
+    endInt, err := strconv.ParseInt(end, 10, 64)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid end timestamp"})
+        return nil, err
+    }
+
+	if startInt > endInt {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid time range"})
+		return nil, err
+	}
+
+	rows, err := db.Query("SELECT * FROM activities WHERE timestamp >= ? AND timestamp <= ?", startInt, endInt)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Database query failed", "message": err})
+        return nil, err
+    }
+    defer rows.Close()
+
+    // Scan the rows into a slice
+    var Activitys []Activity
+    for rows.Next() {
+		var activity Activity
+        err := rows.Scan(&activity.id, &activity.user_id, &activity.m5stick_id, &activity.timestamp)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan row", "message": err})
+            return nil, err
+		}
+		Activitys = append(Activitys, Activity{
+			id: activity.id,
+			user_id: activity.user_id,
+			m5stick_id: activity.m5stick_id,
+			timestamp: activity.timestamp,
+		})
+    }
+	return Activitys, nil
+}
+
 // User はusersテーブルの行を表す構造体です。
 type User struct {
 	ID    int
@@ -129,4 +179,12 @@ type M5Stick struct {
 	Mac   string
 	RoleId int
 	LocationId int
+}
+
+// Activity はactivitiesテーブルの行を表す構造体です。
+type Activity struct {
+	id		 int    `json:"id"`
+	user_id   int    `json:"user_id"`
+	m5stick_id int `json:"m5stick_id"`
+	timestamp int `json:"time_stamp"`
 }
