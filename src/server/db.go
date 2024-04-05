@@ -6,10 +6,24 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"os"
 	"time"
-	"strconv"
-	"github.com/gin-gonic/gin"
-	"net/http"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
+
+// User はusersテーブルの行を表す構造体です。
+type User struct {
+	ID    int
+	UID   string
+	Login string
+}
+
+// M5Stick はm5Stickテーブルの行を表す構造体です。
+type M5Stick struct {
+	ID    int
+	Mac   string
+	RoleId int
+	LocationId int
+}
 
 // InitializeDatabase はデータベース接続の初期化を行います。
 // この関数は外部ファイルから呼び出されることを想定しています。
@@ -18,14 +32,14 @@ func InitializeDatabase() (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	db, err := connectToDatabase(dsn)
+
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
-	if err := verifyConnection(db); err != nil {
-		return nil, err
-	}
-	return db, nil
+	db.AutoMigrate(&User{})
+	db.AutoMigrate(&M5Stick{})
+	return db.DB()
 }
 
 // getDSN はDSN（Data Source Name）を環境変数から取得します。
