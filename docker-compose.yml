@@ -10,6 +10,8 @@ services:
       - '8000:8000'
     networks:
       - docker-network
+    environment:
+      DSN: ${DSN}
     depends_on:
       mariadb:
         condition: service_healthy
