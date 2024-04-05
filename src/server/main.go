@@ -14,7 +14,6 @@ import (
 	"github.com/joho/godotenv"
 
 	"strconv"
-	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -63,17 +62,22 @@ func main() {
 	router.POST("/receive-uid", HandleUIDSubmission)
 	router.POST("/activity/add", addActivity)
 
-	router.GET("/activity/cleanings", func(c *gin.Context) { getCleanData(c) })
+	router.GET("/activity/cleanings", getCleanData)
 
 	router.Run(":8000")
 }
 
 //cleanings?start=[UNIXtime]&end=[UNIXtime]
 func getCleanData(c *gin.Context) {
-
-	db, err := sql.Open("mysql", "user:user@tcp(db:3306)/server")
+	dsn, err := getDSN()
 	if err != nil {
-		log.Println(err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "DSN environment variable is not set"})
+		return
+	}
+	db, err := connectToDatabase(dsn)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
+		return
 	}
 	defer db.Close()
 
@@ -96,9 +100,9 @@ func getCleanData(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid time range"})
 	}
 
-	rows, err := db.Query("SELECT * FROM server WHERE time_stamp >= ? AND time_Sstamp <= ?", startInt, endInt)
+	rows, err := db.Query("SELECT * FROM ACTIVITY WHERE time_stamp >= ? AND time_stamp <= ?", startInt, endInt)
     if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "Database query failed"})
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Database query failed", "message": err})
         return
     }
     defer rows.Close()
@@ -106,15 +110,21 @@ func getCleanData(c *gin.Context) {
     // Scan the rows into a slice
     var Activitys []Activity
     for rows.Next() {
-        var activity Activity
-        if err := rows.Scan(&activity); err != nil {
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan row"})
+		var activity Activity
+        err := rows.Scan(&activity.id, &activity.user_id, &activity.m5stick_id, &activity.timestamp)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan row", "message": err})
             return
-        }
-		log.Println(activity.id, activity.user_id, activity.m5stick_id, activity.timestamp)
-        Activitys = append(Activitys, activity)
+		}
+		Activitys = append(Activitys, Activity{
+			id: activity.id,
+			user_id: activity.user_id,
+			m5stick_id: activity.m5stick_id,
+			timestamp: activity.timestamp,
+		})
     }
-	// c.HTML(200, "index.html", gin.H{activity})
+	log.Println(Activitys)
+	c.HTML(200, "index.html", gin.H{"Activitys": Activitys})
 }
 
 // 環境変数の読み込み
