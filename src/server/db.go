@@ -11,6 +11,8 @@ import (
 
 // ID, CreatedAt, UpdatedAt are reserved columns in GORM
 
+// ID, CreatedAt, UpdatedAt are reserved columns in GORM
+
 // User はusersテーブルの行を表す構造体です。
 type User struct {
 	ID    int
@@ -116,7 +118,10 @@ func connectToDB() (*gorm.DB, error) {
 	}
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&M5Stick{})
-	return db.DB()
+	db.AutoMigrate(&Activity{})
+	db.AutoMigrate(&Location{})
+	db.AutoMigrate(&Role{})
+	return db, nil
 }
 
 // getDSN はDSN（Data Source Name）を環境変数から取得します。
