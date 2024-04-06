@@ -10,11 +10,20 @@ import (
 	"gorm.io/gorm"
 )
 
+// ID, CreatedAt, UpdatedAt are reserved columns in GORM
+
 // User はusersテーブルの行を表す構造体です。
 type User struct {
 	ID    int
 	UID   string
 	Login string
+}
+
+type Activity struct {
+	ID uint
+	UserID int
+	M5StickID int
+	CreatedAt time.Time
 }
 
 // M5Stick はm5Stickテーブルの行を表す構造体です。
@@ -25,9 +34,19 @@ type M5Stick struct {
 	LocationId int
 }
 
+type Location struct {
+	ID int
+	Name string
+}
+
+type Role struct {
+	ID int
+	Name string
+}
+
 // InitializeDatabase はデータベース接続の初期化を行います。
 // この関数は外部ファイルから呼び出されることを想定しています。
-func InitializeDatabase() (*sql.DB, error) {
+func InitializeDatabase() (*gorm.DB, error) {
 	dsn, err := getDSN()
 	if err != nil {
 		return nil, err
@@ -39,7 +58,10 @@ func InitializeDatabase() (*sql.DB, error) {
 	}
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&M5Stick{})
-	return db.DB()
+	db.AutoMigrate(&Activity{})
+	db.AutoMigrate(&Location{})
+	db.AutoMigrate(&Role{})
+	return db, nil
 }
 
 // getDSN はDSN（Data Source Name）を環境変数から取得します。
