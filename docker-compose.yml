@@ -47,8 +47,7 @@ services:
     networks:
       - docker-network
     depends_on:
-      mariadb:
-        condition: service_healthy
+      - mariadb
 networks:
   docker-network:
     driver: bridge
