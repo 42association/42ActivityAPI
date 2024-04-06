@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -259,6 +258,11 @@ func addActivity(c *gin.Context) {
 	if err := db.Where("uid = ?", requestData.Uid).First(&user).Error; err != nil {
 		log.Fatal("Failed to get user:", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// 新しいユーザーを挿入
+	user := User{}
+	if err := db.Where("uid = ?", requestData.Uid).First(&user).Error; err != nil {
+		log.Fatal("Failed to get user:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -269,6 +273,10 @@ func addActivity(c *gin.Context) {
 		return
 	}
 	// Add a new activity
+	activity := Activity{UserID: user.ID, M5StickID: m5Stick.ID}
+	if result := db.Create(&activity); result.Error != nil {
+		log.Fatal("Failed to create activity:", result.Error)
+		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
 	activity := Activity{UserID: user.ID, M5StickID: m5Stick.ID}
 	if result := db.Create(&activity); result.Error != nil {
 		log.Fatal("Failed to create activity:", result.Error)

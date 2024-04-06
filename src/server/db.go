@@ -54,6 +54,16 @@ type Role struct {
 	Name string
 }
 
+type Location struct {
+	ID int
+	Name string
+}
+
+type Role struct {
+	ID int
+	Name string
+}
+
 func initializeDB() (*gorm.DB, error) {
 	db, err := connectToDB()
 	if err != nil {
