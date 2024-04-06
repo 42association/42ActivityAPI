@@ -24,6 +24,7 @@ services:
     container_name: mariadb
     ports:
       - "3306:${MARIA_PORT}"
+      - "3306:${MARIA_PORT}"
     networks:
       - docker-network
     environment:
@@ -31,10 +32,13 @@ services:
       MARIADB_DATABASE: ${MARIA_NAME}
       MARIADB_USER: ${MARIA_USER}
       MARIADB_PASSWORD: ${MARIA_PASS}
+      MARIADB_ROOT_PASSWORD: ${MARIA_ROOT_PASS}
+      MARIADB_DATABASE: ${MARIA_NAME}
+      MARIADB_USER: ${MARIA_USER}
+      MARIADB_PASSWORD: ${MARIA_PASS}
       TZ: 'Asia/Tokyo'
     healthcheck:
-      test: mariadb-check --databases $MARIA_NAME -u $MARIA_USER -p$MARIA_PASS
-      interval: 5s
+      test: mariadb-check --databases $MARIA_NAME -u $MARIA_USER -p{$MARIA_PASS}
   adminer:
     image: adminer
     restart: always
