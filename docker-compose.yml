@@ -38,8 +38,7 @@ services:
       MARIADB_PASSWORD: ${MARIA_PASS}
       TZ: 'Asia/Tokyo'
     healthcheck:
-      test: mariadb-check --databases $MARIA_NAME -u $MARIA_USER -p$MARIA_PASS
-      interval: 5s
+      test: mariadb-check --databases $MARIA_NAME -u $MARIA_USER -p{$MARIA_PASS}
   adminer:
     image: adminer
     restart: always
