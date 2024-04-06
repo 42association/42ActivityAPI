@@ -19,17 +19,17 @@ services:
     image: mariadb:11.4.1-rc-jammy
     container_name: mariadb
     ports:
-      - "3306:3306"
+      - "3306:${MARIA_PORT}"
     networks:
       - docker-network
     environment:
-      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
-      MARIADB_DATABASE: ${MARIADB_DATABASE}
-      MARIADB_USER: ${MARIADB_USER}
-      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${MARIA_ROOT_PASS}
+      MARIADB_DATABASE: ${MARIA_NAME}
+      MARIADB_USER: ${MARIA_USER}
+      MARIADB_PASSWORD: ${MARIA_PASS}
       TZ: 'Asia/Tokyo'
     healthcheck:
-      test: mariadb-check --databases $MARIADB_DATABASE -u $MARIADB_USER -p$MARIADB_PASSWORD
+      test: mariadb-check --databases $MARIA_NAME -u $MARIA_USER -p{$MARIA_PASS}
   adminer:
     image: adminer
     restart: always
