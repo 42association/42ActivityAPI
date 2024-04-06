@@ -18,6 +18,7 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
+    command: go run .
   mariadb:
     image: mariadb:11.4.1-rc-jammy
     container_name: mariadb
