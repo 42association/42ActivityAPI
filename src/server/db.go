@@ -19,10 +19,10 @@ type User struct {
 }
 
 type Activity struct {
-	ID uint
-	UserID int
-	M5StickID int
-	CreatedAt time.Time
+	ID uint `json:"id"`
+	UserID int `json:"user_id"`
+	M5StickID int `json:"m5stick_id"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 // M5Stick はm5Stickテーブルの行を表す構造体です。
@@ -44,12 +44,7 @@ type Role struct {
 }
 
 func initializeDB() (*gorm.DB, error) {
-	dsn, err := getDSN()
-	if err != nil {
-		return nil, err
-	}
-
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err := connectToDB()
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +57,6 @@ func connectToDB() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
@@ -162,7 +156,7 @@ func GetUsers(db *sql.DB) ([]User, error) {
 }
 
 // getCleanData はデータベースから条件に合う掃除データを取得します。/cleanings?start=[UNIXtime]&end=[UNIXtime]
-func getCleanData(c *gin.Context, db *sql.DB) ([]Activity, error) {
+func getCleanData(c *gin.Context, db *gorm.DB) ([]Activity, error) {
 	start := c.Query("start")
     end := c.Query("end")
 
@@ -183,51 +177,28 @@ func getCleanData(c *gin.Context, db *sql.DB) ([]Activity, error) {
 		return nil, err
 	}
 
-	rows, err := db.Query("SELECT * FROM activities WHERE timestamp >= ? AND timestamp <= ?", startInt, endInt)
+	rows, err := db.Table("activities").Where("created_at >= ? AND created_at <= ?", startInt, endInt).Rows()
+	// rows, err := db.Query("SELECT * FROM activities WHERE timestamp >= ? AND timestamp <= ?", startInt, endInt)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Database query failed", "message": err})
         return nil, err
     }
-    defer rows.Close()
-
+	defer rows.Close()
     // Scan the rows into a slice
     var Activitys []Activity
     for rows.Next() {
 		var activity Activity
-        err := rows.Scan(&activity.Id, &activity.User_id, &activity.M5stick_id, &activity.Timestamp)
+        err := rows.Scan(&activity.ID, &activity.UserID, &activity.M5StickID, &activity.CreatedAt)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan row", "message": err})
             return nil, err
 		}
 		Activitys = append(Activitys, Activity{
-			id: activity.Id,
-			user_id: activity.User_id,
-			m5stick_id: activity.M5stick_id,
-			timestamp: activity.Timestamp,
+			ID: activity.ID,
+			UserID: activity.UserID,
+			M5StickID: activity.M5StickID,
+			CreatedAt: activity.CreatedAt,
 		})
     }
 	return Activitys, nil
-}
-
-// User はusersテーブルの行を表す構造体です。
-type User struct {
-	ID    int
-	UID   string
-	Login string
-}
-
-// M5Stick はm5Stickテーブルの行を表す構造体です。
-type M5Stick struct {
-	ID    int
-	Mac   string
-	RoleId int
-	LocationId int
-}
-
-// Activity はactivitiesテーブルの行を表す構造体です。
-type Activity struct {
-	Id		 int    `json:"id"`
-	User_id   int    `json:"user_id"`
-	M5stick_id int `json:"m5stick_id"`
-	Timestamp int `json:"time_stamp"`
 }
