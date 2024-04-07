@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"os"
@@ -44,9 +43,7 @@ type Role struct {
 	Name string
 }
 
-// InitializeDatabase はデータベース接続の初期化を行います。
-// この関数は外部ファイルから呼び出されることを想定しています。
-func InitializeDatabase() (*gorm.DB, error) {
+func initializeDB() (*gorm.DB, error) {
 	dsn, err := getDSN()
 	if err != nil {
 		return nil, err
@@ -56,11 +53,20 @@ func InitializeDatabase() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	db.AutoMigrate(&User{})
-	db.AutoMigrate(&M5Stick{})
-	db.AutoMigrate(&Activity{})
-	db.AutoMigrate(&Location{})
-	db.AutoMigrate(&Role{})
+	db.AutoMigrate(&User{}, &M5Stick{}, &Activity{}, &Location{}, &Role{})
+	
+}
+
+func connectToDB() (*gorm.DB, error) {
+	dsn, err := getDSN()
+	if err != nil {
+		return nil, err
+	}
+
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		return nil, err
+	}
 	return db, nil
 }
 
