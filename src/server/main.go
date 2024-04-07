@@ -10,7 +10,6 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 type Token struct {
@@ -60,9 +59,6 @@ func main() {
 
 // 環境変数の読み込み
 func LoadConfig() (*Config, error) {
-	if err := godotenv.Load(); err != nil {
-		return nil, fmt.Errorf("error loading .env file: %v", err)
-	}
 	config := &Config{
 		UID:         os.Getenv("UID"),
 		Secret:      os.Getenv("SECRET"),
