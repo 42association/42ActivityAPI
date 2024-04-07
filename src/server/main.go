@@ -77,7 +77,12 @@ func getCleanDataHandler(c *gin.Context) {
 		return
 	}
 	log.Println(Activitys)
-	c.HTML(http.StatusOK, "index.html", gin.H{"Activitys": Activitys})
+	jsonData, err := json.Marshal(Activitys)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to marshal JSON"})
+        return
+    }
+	c.HTML(http.StatusOK, "index.html", gin.H{"jsonData": string(jsonData)})
 }
 
 // 環境変数の読み込み

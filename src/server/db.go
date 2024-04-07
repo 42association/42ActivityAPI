@@ -152,16 +152,16 @@ func getCleanData(c *gin.Context, db *sql.DB) ([]Activity, error) {
     var Activitys []Activity
     for rows.Next() {
 		var activity Activity
-        err := rows.Scan(&activity.id, &activity.user_id, &activity.m5stick_id, &activity.timestamp)
+        err := rows.Scan(&activity.Id, &activity.User_id, &activity.M5stick_id, &activity.Timestamp)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan row", "message": err})
             return nil, err
 		}
 		Activitys = append(Activitys, Activity{
-			id: activity.id,
-			user_id: activity.user_id,
-			m5stick_id: activity.m5stick_id,
-			timestamp: activity.timestamp,
+			id: activity.Id,
+			user_id: activity.User_id,
+			m5stick_id: activity.M5stick_id,
+			timestamp: activity.Timestamp,
 		})
     }
 	return Activitys, nil
@@ -184,8 +184,8 @@ type M5Stick struct {
 
 // Activity はactivitiesテーブルの行を表す構造体です。
 type Activity struct {
-	id		 int    `json:"id"`
-	user_id   int    `json:"user_id"`
-	m5stick_id int `json:"m5stick_id"`
-	timestamp int `json:"time_stamp"`
+	Id		 int    `json:"id"`
+	User_id   int    `json:"user_id"`
+	M5stick_id int `json:"m5stick_id"`
+	Timestamp int `json:"time_stamp"`
 }
