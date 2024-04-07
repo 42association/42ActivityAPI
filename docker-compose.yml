@@ -38,7 +38,8 @@ services:
       MARIADB_PASSWORD: ${MARIA_PASS}
       TZ: 'Asia/Tokyo'
     healthcheck:
-      test: mariadb-check --databases $MARIA_NAME -u $MARIA_USER -p{$MARIA_PASS}
+      test: mariadb-check --databases $MARIA_NAME -u $MARIA_USER -p$MARIA_PASS
+      interval: 5s
   adminer:
     image: adminer
     restart: always
@@ -47,7 +48,8 @@ services:
     networks:
       - docker-network
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
 networks:
   docker-network:
     driver: bridge
