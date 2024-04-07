@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,6 +40,10 @@ type Config struct {
 }
 
 func main() {
+	if _, err := initializeDB(); err != nil {
+		log.Fatal("Failed to initialize database:", err)
+	}
+
 	router := gin.Default()
 
 	router.LoadHTMLGlob("templates/*")
@@ -88,6 +91,7 @@ func ShowCallbackPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "callback.html", nil)
 }
 
+// Uid, Codeを受け取り、intraのユーザー情報を取得してデータベースに保存
 // handleRoot関数内でfetchUserDataから返されるintraLoginをレスポンスとして返す
 func HandleUIDSubmission(c *gin.Context) {
 	var requestData RequestData
@@ -110,16 +114,12 @@ func HandleUIDSubmission(c *gin.Context) {
 				return
 			}
 
-			db, err := InitializeDatabase()
+			db, err := connectToDB()
 			if err != nil {
 				log.Fatal("Failed to initialize database:", err)
 			}
-			defer db.Close()
-		
 			// 新しいユーザーを挿入
-			if err := InsertUser(db, requestData.Uid, userData.IntraName); err != nil {
-				log.Fatalf("Failed to insert user: %v", err)
-			}
+			db.Create(&User{UID: requestData.Uid, Login: userData.IntraName})
 			// 取得したuserDataを含めてレスポンスを返す
 			c.JSON(http.StatusOK, gin.H{
 				// "code": requestData.Code,
@@ -183,7 +183,7 @@ func fetchUserData(accessToken string) (*UserData, error) {
 		return nil, fmt.Errorf("HTTP error: %s", resp.Status)
 	}
 
-	userData, err := ioutil.ReadAll(resp.Body)
+	userData, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Printf("Error reading user data: %v\n", err)
 		return nil, err
@@ -219,29 +219,31 @@ func addActivity(c *gin.Context) {
 		c.JSON(http.StatusOK, nil)
 		return
 	}
-	db, err := InitializeDatabase()
+	db, err := connectToDB()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		log.Fatal("Failed to initialize database:", err)
 		return
 	}
-	defer db.Close()
-	user, errUser := GetUserByUid(db, requestData.Uid)
-	if errUser != nil {
-		log.Fatal("Failed to get user:", errUser)
-		c.JSON(http.StatusBadRequest, gin.H{"error": errUser.Error()})
+	// 新しいユーザーを挿入
+	user := User{}
+	if err := db.Where("uid = ?", requestData.Uid).First(&user).Error; err != nil {
+		log.Fatal("Failed to get user:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	m5Stick, errM5Stick := GetM5StickByMac(db, requestData.Mac)
-	if errM5Stick != nil {
-		log.Fatal("Failed to get M5Stick:", errM5Stick)
-		c.JSON(http.StatusBadRequest, gin.H{"error": errM5Stick.Error()})
+
+	m5Stick := M5Stick{}
+	if err := db.Where("mac = ?", requestData.Mac).First(&m5Stick).Error; err != nil {
+		log.Fatal("Failed to get M5Stick:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	// Add a new activity
-	if err := InsertActivity(db, m5Stick.ID, user.ID); err != nil {
-		log.Fatalf("Failed to insert activity: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	activity := Activity{UserID: user.ID, M5StickID: m5Stick.ID}
+	if result := db.Create(&activity); result.Error != nil {
+		log.Fatal("Failed to create activity:", result.Error)
+		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
 		return
 	}
 	// 取得したuserDataを含めてレスポンスを返す
