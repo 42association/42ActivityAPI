@@ -41,6 +41,10 @@ type Config struct {
 }
 
 func main() {
+	if _, err := initializeDB(); err != nil {
+		log.Fatal("Failed to initialize database:", err)
+	}
+
 	router := gin.Default()
 
 	router.LoadHTMLGlob("templates/*")
@@ -114,7 +118,7 @@ func HandleUIDSubmission(c *gin.Context) {
 				return
 			}
 
-			db, err := InitializeDatabase()
+			db, err := connectToDB()
 			if err != nil {
 				log.Fatal("Failed to initialize database:", err)
 			}
@@ -183,7 +187,7 @@ func fetchUserData(accessToken string) (*UserData, error) {
 		return nil, fmt.Errorf("HTTP error: %s", resp.Status)
 	}
 
-	userData, err := ioutil.ReadAll(resp.Body)
+	userData, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Printf("Error reading user data: %v\n", err)
 		return nil, err
@@ -219,7 +223,7 @@ func addActivity(c *gin.Context) {
 		c.JSON(http.StatusOK, nil)
 		return
 	}
-	db, err := InitializeDatabase()
+	db, err := connectToDB()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		log.Fatal("Failed to initialize database:", err)
