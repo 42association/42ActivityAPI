@@ -19,10 +19,15 @@ type User struct {
 }
 
 type Activity struct {
-	ID uint
-	UserID int
-	M5StickID int
-	CreatedAt time.Time
+	ID			uint
+	
+	UserID		int
+	User 		User `gorm:"foreignKey:UserID"`
+
+	M5StickID	int
+	M5Stick		M5Stick `gorm:"foreignKey:M5StickID"`
+
+	CreatedAt	time.Time
 }
 
 // M5Stick はm5Stickテーブルの行を表す構造体です。
