@@ -65,7 +65,7 @@ func initializeDB() (*gorm.DB, error) {
 		return nil, err
 	}
 	db.AutoMigrate(&User{}, &M5Stick{}, &Activity{}, &Location{}, &Role{})
-	
+	return db, nil	
 }
 
 func connectToDB() (*gorm.DB, error) {
