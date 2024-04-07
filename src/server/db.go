@@ -69,7 +69,6 @@ func connectToDB() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
@@ -84,4 +83,52 @@ func getDSN() (string, error) {
 		return "", fmt.Errorf("DB_DSN environment variable is not set")
 	}
 	return dsn, nil
+}
+
+// getCleanData はデータベースから条件に合う掃除データを取得します。/cleanings?start=[UNIXtime]&end=[UNIXtime]
+func getCleanData(c *gin.Context, db *gorm.DB) ([]Activity, error) {
+	start := c.Query("start")
+    end := c.Query("end")
+
+	startInt, err := strconv.ParseInt(start, 10, 64)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid start timestamp"})
+        return nil, err
+    }
+
+    endInt, err := strconv.ParseInt(end, 10, 64)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid end timestamp"})
+        return nil, err
+    }
+
+	if startInt > endInt {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid time range"})
+		return nil, err
+	}
+
+	rows, err := db.Table("activities").Where("created_at >= ? AND created_at <= ?", startInt, endInt).Rows()
+	// rows, err := db.Query("SELECT * FROM activities WHERE timestamp >= ? AND timestamp <= ?", startInt, endInt)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Database query failed", "message": err})
+        return nil, err
+    }
+	defer rows.Close()
+    // Scan the rows into a slice
+    var Activitys []Activity
+    for rows.Next() {
+		var activity Activity
+        err := rows.Scan(&activity.ID, &activity.UserID, &activity.M5StickID, &activity.CreatedAt)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan row", "message": err})
+            return nil, err
+		}
+		Activitys = append(Activitys, Activity{
+			ID: activity.ID,
+			UserID: activity.UserID,
+			M5StickID: activity.M5StickID,
+			CreatedAt: activity.CreatedAt,
+		})
+    }
+	return Activitys, nil
 }
