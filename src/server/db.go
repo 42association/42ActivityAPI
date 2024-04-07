@@ -25,7 +25,7 @@ type Activity struct {
 	ID uint `json:"id"`
 	UserID int `json:"user_id"`
 	M5StickID int `json:"m5stick_id"`
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt uint `json:"created_at"`
 }
 
 // M5Stick はm5Stickテーブルの行を表す構造体です。
