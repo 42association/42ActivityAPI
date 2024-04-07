@@ -64,29 +64,25 @@ func main() {
 }
 
 //cleanings?start=[UNIXtime]&end=[UNIXtime]
+//あとroleも
 func getCleanDataHandler(c *gin.Context) {
-	dsn, err := getDSN()
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "DSN environment variable is not set"})
-		return
-	}
-	db, err := connectToDatabase(dsn)
+	db, err := connectToDB()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
 		return
 	}
-	defer db.Close()
 	Activitys, err := getCleanData(c, db)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get clean data"})
 		return
 	}
-	log.Println(Activitys)
+	log.Println("Activitys", Activitys)
 	jsonData, err := json.Marshal(Activitys)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to marshal JSON"})
         return
     }
+	log.Println("jsondata", string(jsonData))
 	c.HTML(http.StatusOK, "index.html", gin.H{"jsonData": string(jsonData)})
 }
 
