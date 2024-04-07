@@ -65,6 +65,20 @@ func initializeDB() (*gorm.DB, error) {
 		return nil, err
 	}
 	db.AutoMigrate(&User{}, &M5Stick{}, &Activity{}, &Location{}, &Role{})
+	
+}
+
+func connectToDB() (*gorm.DB, error) {
+	dsn, err := getDSN()
+	if err != nil {
+		return nil, err
+	}
+
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		return nil, err
+	}
+	db.AutoMigrate(&User{}, &M5Stick{}, &Activity{}, &Location{}, &Role{})
 	return db, nil	
 }
 
