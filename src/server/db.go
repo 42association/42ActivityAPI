@@ -34,8 +34,12 @@ type Activity struct {
 type M5Stick struct {
 	ID    int
 	Mac   string
+	
 	RoleId int
+	Role   Role `gorm:"foreignKey:RoleId"`
+
 	LocationId int
+	Location   Location `gorm:"foreignKey:LocationId"`
 }
 
 type Location struct {
