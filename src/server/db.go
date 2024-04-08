@@ -20,7 +20,7 @@ type User struct {
 
 type Activity struct {
 	ID			uint `json: "id"`
-	
+
 	UserID		int `json: "user_id"`
 	User 		User `gorm:"foreignKey:UserID"`
 
@@ -38,6 +38,7 @@ type M5Stick struct {
 	Role   Role `gorm:"foreignKey:RoleId"`
 
 	LocationId int
+	Location   Location `gorm:"foreignKey:LocationId"`
 }
 
 type Location struct {
@@ -70,6 +71,14 @@ func connectToDB() (*gorm.DB, error) {
 	}
 	db.AutoMigrate(&User{}, &M5Stick{}, &Activity{}, &Location{}, &Role{})
 	return db, nil	
+}
+
+func getDSN() (string, error) {
+	dsn := os.Getenv("DSN")
+	if dsn == "" {
+		return "", fmt.Errorf("DB_DSN environment variable is not set")
+	}
+	return dsn, nil
 }
 
 func seed(db *gorm.DB) error {
@@ -113,15 +122,6 @@ func seed(db *gorm.DB) error {
 	}
 
 	return nil
-}
-
-// getDSN はDSN（Data Source Name）を環境変数から取得します。
-func getDSN() (string, error) {
-	dsn := os.Getenv("DSN")
-	if dsn == "" {
-		return "", fmt.Errorf("DB_DSN environment variable is not set")
-	}
-	return dsn, nil
 }
 
 // getCleanData はデータベースから条件に合う掃除データを取得します。/cleanings?start=[UNIXtime]&end=[UNIXtime]

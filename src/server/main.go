@@ -259,7 +259,6 @@ func addActivity(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
 	m5Stick := M5Stick{}
 	if err := db.Where("mac = ?", requestData.Mac).First(&m5Stick).Error; err != nil {
 		log.Fatal("Failed to get M5Stick:", err)
@@ -271,6 +270,7 @@ func addActivity(c *gin.Context) {
 	if result := db.Create(&activity); result.Error != nil {
 		log.Fatal("Failed to create activity:", result.Error)
 		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
+		return
 	}
 	// 取得したuserDataを含めてレスポンスを返す
 	c.JSON(http.StatusOK, gin.H{
