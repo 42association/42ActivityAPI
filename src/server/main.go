@@ -10,7 +10,6 @@ import (
 	"net/url"
 	"os"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -64,7 +63,6 @@ func main() {
 }
 
 //cleanings?start=[UNIXtime]&end=[UNIXtime]
-//あとroleも
 func getCleanDataHandler(c *gin.Context) {
 	db, err := connectToDB()
 	if err != nil {
@@ -259,11 +257,6 @@ func addActivity(c *gin.Context) {
 	if err := db.Where("uid = ?", requestData.Uid).First(&user).Error; err != nil {
 		log.Fatal("Failed to get user:", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	// 新しいユーザーを挿入
-	user := User{}
-	if err := db.Where("uid = ?", requestData.Uid).First(&user).Error; err != nil {
-		log.Fatal("Failed to get user:", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -278,11 +271,6 @@ func addActivity(c *gin.Context) {
 	if result := db.Create(&activity); result.Error != nil {
 		log.Fatal("Failed to create activity:", result.Error)
 		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
-	activity := Activity{UserID: user.ID, M5StickID: m5Stick.ID}
-	if result := db.Create(&activity); result.Error != nil {
-		log.Fatal("Failed to create activity:", result.Error)
-		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
-		return
 	}
 	// 取得したuserDataを含めてレスポンスを返す
 	c.JSON(http.StatusOK, gin.H{

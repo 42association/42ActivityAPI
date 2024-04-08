@@ -24,14 +24,9 @@ services:
     container_name: mariadb
     ports:
       - "3306:${MARIA_PORT}"
-      - "3306:${MARIA_PORT}"
     networks:
       - docker-network
     environment:
-      MARIADB_ROOT_PASSWORD: ${MARIA_ROOT_PASS}
-      MARIADB_DATABASE: ${MARIA_NAME}
-      MARIADB_USER: ${MARIA_USER}
-      MARIADB_PASSWORD: ${MARIA_PASS}
       MARIADB_ROOT_PASSWORD: ${MARIA_ROOT_PASS}
       MARIADB_DATABASE: ${MARIA_NAME}
       MARIADB_USER: ${MARIA_USER}
