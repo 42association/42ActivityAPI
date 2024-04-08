@@ -21,6 +21,10 @@ jobs:
       with:
         go-version: '1.20'
 
+    - name: haha
+      run: pwd
+    - name: ls
+      run: ls -l
     - name: Build
       run: go build -v ./src/server
 
