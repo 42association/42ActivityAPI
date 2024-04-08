@@ -74,6 +74,7 @@ func getCleanDataHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get clean data"})
 		return
 	}
+	log.Println("Activitys", Activitys)
 	jsonData, err := json.Marshal(Activitys)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to marshal JSON"})

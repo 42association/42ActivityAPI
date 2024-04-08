@@ -126,47 +126,38 @@ func seed(db *gorm.DB) error {
 
 // getCleanData はデータベースから条件に合う掃除データを取得します。/cleanings?start=[UNIXtime]&end=[UNIXtime]
 func getCleanData(c *gin.Context, db *gorm.DB) ([]Activity, error) {
+	// クエリパラメータからstartとendを取得
 	start := c.Query("start")
     end := c.Query("end")
 
+	// startとendを文字列から整数に変換
 	startInt, err := strconv.ParseInt(start, 10, 64)
     if err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid start timestamp"})
         return nil, err
     }
-
     endInt, err := strconv.ParseInt(end, 10, 64)
     if err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid end timestamp"})
         return nil, err
     }
 
+	// startがendより大きい場合はエラーを返す
 	if startInt > endInt {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid time range"})
 		return nil, err
 	}
 
-	rows, err := db.Table("activities").
-		Joins("INNER JOIN m5_sticks ON activities.m5_stick_id = m5_sticks.id").
-		Joins("INNER JOIN roles ON m5_sticks.role_id = roles.id").
-		Where("roles.name = ?", "cleaning").
+	var activities []Activity
+    err = db.
+        Preload("User").Preload("M5Stick").Preload("M5Stick.Role").Preload("M5Stick.Location").
 		Where("created_at >= ? AND created_at <= ?", startInt, endInt).
-		Rows()
+        Joins("INNER JOIN m5_sticks ON activities.m5_stick_id = m5_sticks.id INNER JOIN roles ON m5_sticks.role_id = roles.id").
+        Where("roles.name = ?", "cleaning").
+        Find(&activities).Error
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Database query failed", "message": err})
         return nil, err
-    }
-	defer rows.Close()
-    // Scan the rows into a slice
-    var activities []Activity
-    for rows.Next() {
-		var activity Activity
-		err := db.ScanRows(rows, &activity)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan row", "message": err})
-            return nil, err
-		}
-		activities = append(activities, activity)
     }
 	return activities, nil
 }
