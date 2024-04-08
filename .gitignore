@@ -1,5 +1,3 @@
 .env
 Makefile
-*.mod
-*.sum
 d42
