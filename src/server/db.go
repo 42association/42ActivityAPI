@@ -27,7 +27,7 @@ type Activity struct {
 	M5StickID	int `json: "m5stick_id"`
 	M5Stick		M5Stick `gorm:"foreignKey:M5StickID"`
 
-	CreatedAt	time.Time `json: "created_at"`
+	CreatedAt	int64 `json: "created_at"`
 }
 
 type M5Stick struct {
@@ -112,8 +112,8 @@ func seed(db *gorm.DB) error {
 	}
 
 	activities := []Activity{
-		{UserID: 1, M5StickID: 1},
-		{UserID: 2, M5StickID: 2},
+		{UserID: 1, M5StickID: 1, CreatedAt: time.Now().Unix()},
+		{UserID: 2, M5StickID: 2, CreatedAt: time.Now().Unix()},
 	}
 	for _, activity := range activities {
 		if result := db.Create(&activity); result.Error != nil {
@@ -146,28 +146,27 @@ func getCleanData(c *gin.Context, db *gorm.DB) ([]Activity, error) {
 		return nil, err
 	}
 
-	rows, err := db.Table("activities").Where("created_at >= ? AND created_at <= ?", startInt, endInt).Rows()
-	// rows, err := db.Query("SELECT * FROM activities WHERE timestamp >= ? AND timestamp <= ?", startInt, endInt)
+	rows, err := db.Table("activities").
+		Joins("INNER JOIN m5_sticks ON activities.m5_stick_id = m5_sticks.id").
+		Joins("INNER JOIN roles ON m5_sticks.role_id = roles.id").
+		Where("roles.name = ?", "cleaning").
+		Where("created_at >= ? AND created_at <= ?", startInt, endInt).
+		Rows()
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Database query failed", "message": err})
         return nil, err
     }
 	defer rows.Close()
     // Scan the rows into a slice
-    var Activitys []Activity
+    var activities []Activity
     for rows.Next() {
 		var activity Activity
-        err := rows.Scan(&activity.ID, &activity.UserID, &activity.M5StickID, &activity.CreatedAt)
+		err := db.ScanRows(rows, &activity)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan row", "message": err})
             return nil, err
 		}
-		Activitys = append(Activitys, Activity{
-			ID: activity.ID,
-			UserID: activity.UserID,
-			M5StickID: activity.M5StickID,
-			CreatedAt: activity.CreatedAt,
-		})
+		activities = append(activities, activity)
     }
-	return Activitys, nil
+	return activities, nil
 }
