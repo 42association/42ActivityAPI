@@ -5,9 +5,14 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"os"
 	"time"
+	"strconv"
+	"github.com/gin-gonic/gin"
+	"net/http"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
+
+// ID, CreatedAt, UpdatedAt are reserved columns in GORM
 
 // ID, CreatedAt, UpdatedAt are reserved columns in GORM
 
@@ -41,7 +46,6 @@ type M5Stick struct {
 	Role   Role `gorm:"foreignKey:RoleId"`
 
 	LocationId int
-	Location   Location `gorm:"foreignKey:LocationId"`
 }
 
 type Location struct {
