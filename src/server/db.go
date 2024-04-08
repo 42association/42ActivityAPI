@@ -19,18 +19,27 @@ type User struct {
 }
 
 type Activity struct {
-	ID uint
-	UserID int
-	M5StickID int
-	CreatedAt time.Time
+	ID			uint
+	
+	UserID		int
+	User 		User `gorm:"foreignKey:UserID"`
+
+	M5StickID	int
+	M5Stick		M5Stick `gorm:"foreignKey:M5StickID"`
+
+	CreatedAt	time.Time
 }
 
 // M5Stick はm5Stickテーブルの行を表す構造体です。
 type M5Stick struct {
 	ID    int
 	Mac   string
+	
 	RoleId int
+	Role   Role `gorm:"foreignKey:RoleId"`
+
 	LocationId int
+	Location   Location `gorm:"foreignKey:LocationId"`
 }
 
 type Location struct {
@@ -55,6 +64,49 @@ func initializeDB() (*gorm.DB, error) {
 	}
 	db.AutoMigrate(&User{}, &M5Stick{}, &Activity{}, &Location{}, &Role{})
 	return db, nil	
+}
+
+func seed(db *gorm.DB) error {
+	// Create a new user
+	users := []User{{UID: "foo", Login: "kakiba"}, {UID: "bar", Login: "tanemura"}}
+	for _, user := range users {
+		if result := db.Create(&user); result.Error != nil {
+			return result.Error
+		}
+	}
+
+	locations := []Location{{Name: "F1"}, {Name: "F2"}}
+	for _, location := range locations {
+		if result := db.Create(&location); result.Error != nil {
+			return result.Error
+		}
+	}
+
+	roles := []Role{{Name: "Cleaning"}, {Name: "UsingShower"}}
+	for _, role := range roles {
+		if result := db.Create(&role); result.Error != nil {
+			return result.Error
+		}
+	}
+
+	m5Sticks := []M5Stick{{Mac: "00:00:00:00:00:00", RoleId: 1, LocationId: 1}, {Mac: "11:11:11:11:11:11", RoleId: 2, LocationId: 2}}
+	for _, m5Stick := range m5Sticks {
+		if result := db.Create(&m5Stick); result.Error != nil {
+			return result.Error
+		}
+	}
+
+	activities := []Activity{
+		{UserID: 1, M5StickID: 1},
+		{UserID: 2, M5StickID: 2},
+	}
+	for _, activity := range activities {
+		if result := db.Create(&activity); result.Error != nil {
+			return result.Error
+		}
+	}
+
+	return nil
 }
 
 func connectToDB() (*gorm.DB, error) {
