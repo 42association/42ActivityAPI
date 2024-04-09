@@ -9,9 +9,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// ID, CreatedAt, UpdatedAt are reserved columns in GORM
-
-// User はusersテーブルの行を表す構造体です。
 type User struct {
 	ID    int
 	UID   string
@@ -19,18 +16,17 @@ type User struct {
 }
 
 type Activity struct {
-	ID			uint
-	
-	UserID		int
+	ID			uint `json: "id"`
+
+	UserID		int `json: "user_id"`
 	User 		User `gorm:"foreignKey:UserID"`
 
-	M5StickID	int
+	M5StickID	int `json: "m5stick_id"`
 	M5Stick		M5Stick `gorm:"foreignKey:M5StickID"`
 
-	CreatedAt	time.Time
+	CreatedAt	int64 `json: "created_at"`
 }
 
-// M5Stick はm5Stickテーブルの行を表す構造体です。
 type M5Stick struct {
 	ID    int
 	Mac   string
@@ -53,17 +49,33 @@ type Role struct {
 }
 
 func initializeDB() (*gorm.DB, error) {
+	db, err := connectToDB()
+	if err != nil {
+		return nil, err
+	}
+	db.AutoMigrate(&User{}, &M5Stick{}, &Activity{}, &Location{}, &Role{})
+	return db, nil	
+}
+
+func connectToDB() (*gorm.DB, error) {
 	dsn, err := getDSN()
 	if err != nil {
 		return nil, err
 	}
-
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
 	db.AutoMigrate(&User{}, &M5Stick{}, &Activity{}, &Location{}, &Role{})
 	return db, nil	
+}
+
+func getDSN() (string, error) {
+	dsn := os.Getenv("DSN")
+	if dsn == "" {
+		return "", fmt.Errorf("DB_DSN environment variable is not set")
+	}
+	return dsn, nil
 }
 
 func seed(db *gorm.DB) error {
@@ -97,8 +109,8 @@ func seed(db *gorm.DB) error {
 	}
 
 	activities := []Activity{
-		{UserID: 1, M5StickID: 1},
-		{UserID: 2, M5StickID: 2},
+		{UserID: 1, M5StickID: 1, CreatedAt: time.Now().Unix()},
+		{UserID: 2, M5StickID: 2, CreatedAt: time.Now().Unix()},
 	}
 	for _, activity := range activities {
 		if result := db.Create(&activity); result.Error != nil {
@@ -109,24 +121,20 @@ func seed(db *gorm.DB) error {
 	return nil
 }
 
-func connectToDB() (*gorm.DB, error) {
-	dsn, err := getDSN()
+func getActivitiesFromDB(start_time int64, end_time int64, role string) ([]Activity, error) {
+	db, err := connectToDB()
 	if err != nil {
 		return nil, err
 	}
-
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	var activities []Activity
+	err = db.
+		Preload("User").Preload("M5Stick").Preload("M5Stick.Role").Preload("M5Stick.Location").
+		Where("created_at >= ? AND created_at <= ?", start_time, end_time).
+		Joins("INNER JOIN m5_sticks ON activities.m5_stick_id = m5_sticks.id INNER JOIN roles ON m5_sticks.role_id = roles.id").
+		Where("roles.name = ?", role).
+		Find(&activities).Error
 	if err != nil {
 		return nil, err
 	}
-	return db, nil
-}
-
-// getDSN はDSN（Data Source Name）を環境変数から取得します。
-func getDSN() (string, error) {
-	dsn := os.Getenv("DSN")
-	if dsn == "" {
-		return "", fmt.Errorf("DB_DSN environment variable is not set")
-	}
-	return dsn, nil
+	return activities, nil
 }
