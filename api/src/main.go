@@ -55,9 +55,9 @@ func main() {
 	router.GET("/:uid", RedirectToIndexWithUID)
 	router.GET("/callback", ShowCallbackPage)
 	router.POST("/receive-uid", HandleUIDSubmission)
-	router.POST("/activity/add", addActivity)
+	router.POST("/activities", addActivity)
 
-	router.GET("/activity/get/cleanings", getCleanDataHandler)
+	router.GET("/activities/cleanings", getCleanDataHandler)
 
 	router.Run(":8000")
 }
