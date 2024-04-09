@@ -76,17 +76,7 @@ func getCleanDataHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get activities"})
 		return
 	}
-
-	//json形式に変換
-	jsonData, err := json.Marshal(Activities)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to marshal JSON"})
-		return
-	}
-
-	//jsonデータを表示
-	log.Println("jsondata", string(jsonData))
-	c.HTML(http.StatusOK, "index.html", gin.H{"jsonData": string(jsonData)})
+	c.JSON(http.StatusOK, Activities)
 }
 
 func getQueryAboutTime(c *gin.Context) (int64, int64, error) {
