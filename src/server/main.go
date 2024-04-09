@@ -11,6 +11,7 @@ import (
 	"os"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"strconv"
 )
 
 type Token struct {
@@ -57,31 +58,53 @@ func main() {
 	router.POST("/receive-uid", HandleUIDSubmission)
 	router.POST("/activity/add", addActivity)
 
-	router.GET("/activity/cleanings", getCleanDataHandler)
+	router.GET("/activity/get/cleanings", getCleanDataHandler)
 
 	router.Run(":8000")
 }
 
-//cleanings?start=[UNIXtime]&end=[UNIXtime]
 func getCleanDataHandler(c *gin.Context) {
-	db, err := connectToDB()
+	//start_timeとend_timeを取得
+	start_time, end_time, err := getQueryAboutTime(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid query"})
 		return
 	}
-	Activitys, err := getCleanData(c, db)
+
+	//roleがcleaningのactivityを取得
+	Activities, err := getActivitiesFromDB(start_time, end_time, "cleaning")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get clean data"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get activities"})
 		return
 	}
-	log.Println("Activitys", Activitys)
-	jsonData, err := json.Marshal(Activitys)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to marshal JSON"})
-        return
-    }
+
+	//json形式に変換
+	jsonData, err := json.Marshal(Activities)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to marshal JSON"})
+		return
+	}
+
+	//jsonデータを表示
 	log.Println("jsondata", string(jsonData))
 	c.HTML(http.StatusOK, "index.html", gin.H{"jsonData": string(jsonData)})
+}
+
+func getQueryAboutTime(c *gin.Context) (int64, int64, error) {
+	start := c.Query("start")
+	end := c.Query("end")
+	start_time, err := strconv.ParseInt(start, 10, 64)
+	if err != nil {
+		return 0, 0, err
+	}
+	end_time, err := strconv.ParseInt(end, 10, 64)
+	if err != nil {
+		return 0, 0, err
+	}
+	if start_time > end_time {
+		return 0, 0, errors.New("Invalid time range")
+	}
+	return start_time, end_time, nil
 }
 
 // 環境変数の読み込み
