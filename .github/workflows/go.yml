@@ -12,13 +12,13 @@ on:
 defaults:
   run:
     shell: bash
-    working-directory: ./src/server
+    working-directory: ./src/api
 
 jobs:
   build:
     defaults:
       run:
-        working-directory: ./src/server
+        working-directory: ./src/api
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

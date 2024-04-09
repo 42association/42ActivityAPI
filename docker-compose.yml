@@ -1,10 +1,10 @@
 services:
-  server:
+  api:
     image: golang:1.22.1-alpine3.19
-    container_name: server
+    container_name: api
     tty: true
     volumes:
-      - ./src/server:/code
+      - ./src/api:/code
     working_dir: /code
     ports:
       - '8000:8000'
