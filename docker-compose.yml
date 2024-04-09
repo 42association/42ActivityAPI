@@ -4,7 +4,7 @@ services:
     container_name: api
     tty: true
     volumes:
-      - ./src/server:/code
+      - ./src/api:/code
     working_dir: /code
     ports:
       - '8000:8000'
