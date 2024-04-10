@@ -33,12 +33,12 @@ paths:
       summary: "掃除データの取得"
       description: "指定した期間でrole(cleaning)に紐づくデータを返します"
       parameters:
-        - name: start_time
+        - name: start
           in: query
           required: true
           description: "絞り込む期間の開始時刻(Unix秒)"
           schema: {type: string, example: '1711966578'}
-        - name: end_time
+        - name: end
           in: query
           required: true
           description: "絞り込む期間の終了時刻(Unix秒)"
@@ -71,30 +71,38 @@ components:
           ID: {type: integer, example: 1}
           UserID: {type: integer, example: 1}
           User:
-            type: object
-            properties:
-              ID: {type: integer, example: 1}
-              UID: {type: string, example: "foo"}
-              Login: {type: string, example: "kakiba"}
+            $ref: '#/components/schemas/User'
           M5StickID: {type: integer, example: 1}
           M5Stick:
-            type: object
-            properties:
-              ID: {type: integer, example: 1}
-              Mac: {type: string, example: "00:00:00:00:00:00"}
-              RoleId: {type: integer, example: 1}
-              Role:
-                type: object
-                properties:
-                  ID: {type: integer, example: 1}
-                  Name: {type: string, example: "Cleaning"}
-              LocationId: {type: integer, example: 1}
-              Location:
-                type: object
-                properties:
-                  ID: {type: integer, example: 1}
-                  Name: {type: string, example: "F1"}
+            $ref: '#/components/schemas/M5Stick'
           CreatedAt: {type: integer, example: 1712666900}
+    User:
+      type: object
+      properties:
+        ID: {type: integer, example: 1}
+        UID: {type: string, example: "foo"}
+        Login: {type: string, example: "kakiba"}
+    M5Stick:
+      type: object
+      properties:
+        ID: {type: integer, example: 1}
+        Mac: {type: string, example: "00:00:00:00:00:00"}
+        RoleId: {type: integer, example: 1}
+        Role:
+          $ref: '#/components/schemas/Role'
+        LocationId: {type: integer, example: 1}
+        Location:
+          $ref: '#/components/schemas/Location'
+    Role:
+      type: object
+      properties:
+        ID: {type: integer, example: 1}
+        Name: {type: string, example: "Cleaning"}
+    Location:
+      type: object
+      properties:
+        ID: {type: integer, example: 1}
+        Name: {type: string, example: "F1"}
     Error:
       type: object
       properties:
