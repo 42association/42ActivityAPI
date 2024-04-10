@@ -85,3 +85,25 @@ func TestRedirectToIndexWithUID(t *testing.T) {
 	expectedRedirectURL := "/?uid=123"
 	assert.Equal(t, expectedRedirectURL, w.Header().Get("Location"))
 }
+
+func TestShowCallbackPage(t *testing.T) {
+	router := gin.New()
+
+	router.LoadHTMLGlob("templates/*.html")
+	router.GET("/callback", ShowCallbackPage)
+
+	req, err := http.NewRequest("GET", "/callback", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = req
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	assert.Equal(t, "text/html; charset=utf-8", w.Header().Get("Content-Type"))
+}
