@@ -14,28 +14,20 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mac: {type: string, example: "00:00:00:00:00:00"}
-                uid: {type: string, example: "foo"}
+              $ref: '#/components/schemas/ActivityData'
       responses:
         '200':
           description: "成功。uidとmacをjsonで返します"
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  uid: {type: string, example: "foo"}
-                  mac: {type: string, example: "00:00:00:00:00:00"}
+                $ref: '#/components/schemas/ActivityData'
         '400':
           description: "失敗。エラーメッセージをjsonで返します"
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error: {type: string, example: "DB_DSN environment variable is not set"}
+                $ref: '#/components/schemas/Error'
   /activities/cleanings:
     get:
       summary: "掃除データの取得"
@@ -57,42 +49,53 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    ID: {type: integer, example: 1}
-                    UserID: {type: integer, example: 1}
-                    User:
-                      type: object
-                      properties:
-                        ID: {type: integer, example: 1}
-                        UID: {type: string, example: "foo"}
-                        Login: {type: string, example: "kakiba"}
-                    M5StickID: {type: integer, example: 1}
-                    M5Stick:
-                      type: object
-                      properties:
-                        ID: {type: integer, example: 1}
-                        Mac: {type: string, example: "00:00:00:00:00:00"}
-                        RoleId: {type: integer, example: 1}
-                        Role:
-                          type: object
-                          properties:
-                            ID: {type: integer, example: 1}
-                            Name: {type: string, example: "Cleaning"}
-                        LocationId: {type: integer, example: 1}
-                        Location:
-                          type: object
-                          properties:
-                            ID: {type: integer, example: 1}
-                            Name: {type: string, example: "F1"}
-                    CreatedAt: {type: integer, example: 1712666900}
+                $ref: '#/components/schemas/cleaningsData'
         '400':
           description: "失敗。エラーメッセージをjsonで返します"
           content:
             application/json:
               schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    ActivityData:
+      type: object
+      properties:
+        mac: {type: string, example: "00:00:00:00:00:00"}
+        uid: {type: string, example: "foo"}
+    cleaningsData:
+      type: array
+      items:
+        type: object
+        properties:
+          ID: {type: integer, example: 1}
+          UserID: {type: integer, example: 1}
+          User:
+            type: object
+            properties:
+              ID: {type: integer, example: 1}
+              UID: {type: string, example: "foo"}
+              Login: {type: string, example: "kakiba"}
+          M5StickID: {type: integer, example: 1}
+          M5Stick:
+            type: object
+            properties:
+              ID: {type: integer, example: 1}
+              Mac: {type: string, example: "00:00:00:00:00:00"}
+              RoleId: {type: integer, example: 1}
+              Role:
                 type: object
                 properties:
-                  error: {type: string, example: "Invalid query"}
+                  ID: {type: integer, example: 1}
+                  Name: {type: string, example: "Cleaning"}
+              LocationId: {type: integer, example: 1}
+              Location:
+                type: object
+                properties:
+                  ID: {type: integer, example: 1}
+                  Name: {type: string, example: "F1"}
+          CreatedAt: {type: integer, example: 1712666900}
+    Error:
+      type: object
+      properties:
+        error: {type: string, example: "Error message"}
