@@ -299,7 +299,6 @@ func addActivity(c *gin.Context) {
 		log.Fatal("Failed to initialize database:", err)
 		return
 	}
-	// 新しいユーザーを挿入
 	user := User{}
 	if err := db.Where("uid = ?", requestData.Uid).First(&user).Error; err != nil {
 		log.Fatal("Failed to get user:", err)
