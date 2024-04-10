@@ -27,3 +27,39 @@ func TestLoadConfig(t *testing.T) {
 	assert.Equal(t, os.Getenv("SECRET"), config.Secret)
 	assert.Equal(t, os.Getenv("CALLBACK_URL"), config.CallbackURL)
 }
+
+type MockConfig struct {
+    UID         string
+    CallbackURL string
+}
+
+// Mock LoadConfig function for testing purposes
+func MockLoadConfig() (*MockConfig, error) {
+    // Mocked configuration values
+    config := &MockConfig{
+        UID:         "mockUID",
+        CallbackURL: "http://mock-callback-url.com",
+    }
+    return config, nil
+}
+
+func TestShowIndexPage(t *testing.T) {
+    router := gin.New()
+    router.LoadHTMLGlob("templates/*")
+
+    router.GET("/", ShowIndexPage)
+
+    req, err := http.NewRequest("GET", "/", nil)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    w := httptest.NewRecorder()
+    c, _ := gin.CreateTestContext(w)
+    c.Request = req
+
+    router.ServeHTTP(w, req)
+
+    assert.Equal(t, http.StatusOK, w.Code)
+
+}
