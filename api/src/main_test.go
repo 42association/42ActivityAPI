@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http/httptest"
 	"net/http"
+	"os"
 )
 
 
@@ -17,4 +18,12 @@ func TestGetQueryAboutTime(t *testing.T) {
 	start, end, _ := getQueryAboutTime(c)
 	assert.Equal(t, int64(100), start)
 	assert.Equal(t, int64(200), end)
+}
+
+
+func TestLoadConfig(t *testing.T) {
+	config, _ := LoadConfig()
+	assert.Equal(t, os.Getenv("UID"), config.UID)
+	assert.Equal(t, os.Getenv("SECRET"), config.Secret)
+	assert.Equal(t, os.Getenv("CALLBACK_URL"), config.CallbackURL)
 }
