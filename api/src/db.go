@@ -12,7 +12,7 @@ import (
 
 type User struct {
 	ID    int
-	UID   string
+	UID   string `gorm:"default:''"`
 	Login string
 	Wallet string `gorm:"size:42;default:''"`
 }
