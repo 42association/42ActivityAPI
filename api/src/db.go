@@ -7,6 +7,7 @@ import (
 	"time"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"errors"
 )
 
 type User struct {
@@ -137,4 +138,90 @@ func getActivitiesFromDB(start_time int64, end_time int64, role string) ([]Activ
 		return nil, err
 	}
 	return activities, nil
+}
+
+func addRoleToDB(roleName string) error {
+	db, err := connectToDB()
+	if err != nil {
+		return err
+	}
+
+	// 同じ名前のRoleがすでに存在するかを確認
+	var existingRole Role
+	if err := db.Where("name = ?", roleName).First(&existingRole).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			return err
+		}
+	} else {
+		return errors.New("Role already exists")
+	}
+	role := Role{Name: roleName}
+
+	// データベースにRoleを追加
+	if result := db.Create(&role); result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+func addLocationToDB(locationName string) error {
+	db, err := connectToDB()
+	if err != nil {
+		return err
+	}
+
+	// 同じ名前のLocationがすでに存在するかを確認
+	var existingLocation Location
+	if err := db.Where("name = ?", locationName).First(&existingLocation).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			return err
+		}
+	} else {
+		return errors.New("Location already exists")
+	}
+	location := Location{Name: locationName}
+
+	// データベースにLocationを追加
+	if result := db.Create(&location); result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+func addM5StickToDB(mac string, roleName string, locationName string) error {
+	db, err := connectToDB()
+	if err != nil {
+		return err
+	}
+
+	// 同じMACアドレスのM5Stickがすでに存在するかを確認
+	var existingM5Stick M5Stick
+	if err := db.Where("mac = ?", mac).First(&existingM5Stick).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			return err
+		}
+	} else {
+		return errors.New("M5Stick already exists")
+	}
+	// roleNameからRoleIdを取得
+	var role Role
+	if err := db.Where("name = ?", roleName).First(&role).Error; err != nil {
+		return err
+	}
+	roleId := role.ID
+
+	// locationNameからLocationIdを取得
+	var location Location
+	if err := db.Where("name = ?", locationName).First(&location).Error; err != nil {
+		return err
+	}
+	locationId := location.ID
+
+	m5Stick := M5Stick{Mac: mac, RoleId: roleId, LocationId: locationId}
+
+	// データベースにM5Stickを追加
+	if result := db.Create(&m5Stick); result.Error != nil {
+		return result.Error
+	}
+	return nil
 }

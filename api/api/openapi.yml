@@ -56,6 +56,72 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /roles:
+    post:
+      summary: "ロールの追加"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleData'
+      responses:
+        '200':
+          description: "成功。追加したロールをjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleData'
+        '400':
+          description: "失敗。エラーメッセージをjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /locations:
+    post:
+      summary: "場所の追加"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocationData'
+      responses:
+        '200':
+          description: "成功。追加した場所をjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationData'
+        '400':
+          description: "失敗。エラーメッセージをjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /m5sticks:
+    post:
+      summary: "M5Stickの追加"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/M5StickData'
+      responses:
+        '200':
+          description: "成功。追加したM5Stickをjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/M5StickData'
+        '400':
+          description: "失敗。エラーメッセージをjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     ActivityData:
@@ -103,6 +169,20 @@ components:
       properties:
         ID: {type: integer, example: 1}
         Name: {type: string, example: "F1"}
+    RoleData:
+      type: object
+      properties:
+        name: {type: string, example: "Cleaning"}
+    LocationData:
+      type: object
+      properties:
+        name: {type: string, example: "F1"}
+    M5StickData:
+      type: object
+      properties:
+        mac: {type: string, example: "00:00:00:00:00:00"}
+        role: {type: string, example: "Cleaning"}
+        location: {type: string, example: "F1"}
     Error:
       type: object
       properties:
