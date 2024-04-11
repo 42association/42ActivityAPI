@@ -12,8 +12,9 @@ import (
 
 type User struct {
 	ID    int
-	UID   string
+	UID   string `gorm:"default:''"`
 	Login string
+	Wallet string `gorm:"size:42;default:''"`
 }
 
 type Activity struct {
@@ -81,7 +82,7 @@ func getDSN() (string, error) {
 
 func seed(db *gorm.DB) error {
 	// Create a new user
-	users := []User{{UID: "foo", Login: "kakiba"}, {UID: "bar", Login: "tanemura"}}
+	users := []User{{UID: "foo", Login: "kakiba", Wallet:"0xA0D9F5854A77D4906906BCEDAAEBB3A39D61165A"}, {UID: "bar", Login: "tanemura", Wallet:"42156DF83404D7833BE3DBDB5D1B367964FDF037"}}
 	for _, user := range users {
 		if result := db.Create(&user); result.Error != nil {
 			return result.Error

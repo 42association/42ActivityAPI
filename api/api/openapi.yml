@@ -148,6 +148,7 @@ components:
         ID: {type: integer, example: 1}
         UID: {type: string, example: "foo"}
         Login: {type: string, example: "kakiba"}
+        Wallet: {type: string, example: "0xA0D9F5854A77D4906906BCEDAAEBB3A39D61165A"}
     M5Stick:
       type: object
       properties:
