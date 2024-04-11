@@ -6,6 +6,30 @@ info:
 servers:
   - url: http://localhost:8000
 paths:
+  /users:
+    post:
+      summary: "ユーザの追加"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserData'
+              required:
+                - login
+      responses:
+        '200':
+          description: "成功。追加したユーザをjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserData'
+        '400':
+          description: "失敗。エラーメッセージをjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /activities:
     post:
       summary: "アクティビティの追加"
@@ -170,6 +194,12 @@ components:
       properties:
         ID: {type: integer, example: 1}
         Name: {type: string, example: "F1"}
+    UserData:
+      type: object
+      properties:
+        login: {type: string, example: "kakiba", description: "intra名"}
+        uid: {type: string, example: "foo", description: "intra名に紐づくuid"}
+        wallet: {type: string, example: "0xA0D9F5854A77D4906906BCEDAAEBB3A39D61165A", description: "walletアドレス"}
     RoleData:
       type: object
       properties:

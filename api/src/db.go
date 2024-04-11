@@ -226,3 +226,27 @@ func addM5StickToDB(mac string, roleName string, locationName string) error {
 	}
 	return nil
 }
+
+func addUserToDB(uid string, login string, wallet string) error {
+	db, err := connectToDB()
+	if err != nil {
+		return err
+	}
+
+	// 同じLoginのUserがすでに存在するかを確認
+	var existingUser User
+	if err := db.Where("login = ?", login).First(&existingUser).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			return err
+		}
+	} else {
+		return errors.New("User already exists")
+	}
+	user := User{UID: uid, Login: login, Wallet: wallet}
+
+	// データベースにUserを追加
+	if result := db.Create(&user); result.Error != nil {
+		return result.Error
+	}
+	return nil
+}

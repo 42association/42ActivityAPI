@@ -26,6 +26,12 @@ type RequestData struct {
 	Uid  string `json:"uid"`
 }
 
+type UserRequestData struct {
+	Uid string `json:"uid"`
+	Login string `json:"login"`
+	Wallet string `json:"wallet"`
+}
+
 type ActivityRequestData struct {
 	Mac string `json:"mac"`
 	Uid string `json:"uid"`
@@ -79,6 +85,8 @@ func main() {
 	router.POST("/locations", addLocation)
 
 	router.POST("/m5sticks", addM5Stick)
+
+	router.POST("/users", addUser)
 
 	router.Run(":8000")
 }
@@ -387,5 +395,27 @@ func addM5Stick(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"mac": requestData.Mac, "role": requestData.RoleName, "location": requestData.LocationName})
+	return
+}
+
+func addUser(c *gin.Context) {
+	var requestData UserRequestData
+
+	// JSONリクエストボディを解析してrequestDataに格納
+	if err := c.BindJSON(&requestData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if requestData.Login == "" {
+		// パラメータが空の場合はnullを返す
+		c.JSON(http.StatusOK, nil)
+		return
+	}
+	// データベースにUserを追加
+	if err := addUserToDB(requestData.Uid, requestData.Login, requestData.Wallet); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"uid": requestData.Uid, "login": requestData.Login, "wallet": requestData.Wallet})
 	return
 }
