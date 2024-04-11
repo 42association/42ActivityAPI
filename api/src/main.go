@@ -11,7 +11,7 @@ import (
 	"os"
 	"github.com/gin-gonic/gin"
 	"strconv"
-	"time"
+	"github.com/jinzhu/now"
 )
 
 type Token struct {
@@ -85,11 +85,10 @@ func getQueryAboutTime(c *gin.Context) (int64, int64, error) {
 	var end_time int64
 	var err error
 
-	now := time.Now()
 	start := c.Query("start")
 	if start == "" {
 		//startパラメータがない場合は当日の0時0分0秒を取得
-		start_time = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).Unix()
+		start_time = now.BeginningOfDay().Unix()
 	} else {
 		start_time, err = strconv.ParseInt(start, 10, 64)
 		if err != nil {
