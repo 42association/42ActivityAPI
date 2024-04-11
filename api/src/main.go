@@ -98,7 +98,7 @@ func getQueryAboutTime(c *gin.Context) (int64, int64, error) {
 	end := c.Query("end")
 	if end == "" {
 		//endパラメータがない場合はstart_timeの24時間後を取得
-		end_time = start_time + 24*60*60
+		end_time = now.EndOfDay().Unix()
 	} else {
 		end_time, err = strconv.ParseInt(end, 10, 64)
 		if err != nil {
