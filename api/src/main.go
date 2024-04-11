@@ -11,6 +11,7 @@ import (
 	"os"
 	"github.com/gin-gonic/gin"
 	"strconv"
+	"time"
 )
 
 type Token struct {
@@ -80,17 +81,29 @@ func getCleanDataHandler(c *gin.Context) {
 }
 
 func getQueryAboutTime(c *gin.Context) (int64, int64, error) {
+	var start_time int64
+	var end_time int64
+	var err error
+
 	start := c.Query("start")
+	if start == "" {
+		start_time = time.Now().AddDate(0, 0, -7).Unix() //startパラメータがない場合は7日前の時間を取得
+	} else {
+		start_time, err = strconv.ParseInt(start, 10, 64)
+		if err != nil {
+			return 0, 0, err
+		}
+	}
 	end := c.Query("end")
-	start_time, err := strconv.ParseInt(start, 10, 64)
-	if err != nil {
-		return 0, 0, err
+	if end == "" {
+		end_time = time.Now().Unix() //endパラメータがない場合は現在の時間を取得
+	} else {
+		end_time, err = strconv.ParseInt(end, 10, 64)
+		if err != nil {
+			return 0, 0, err
+		}
 	}
-	end_time, err := strconv.ParseInt(end, 10, 64)
-	if err != nil {
-		return 0, 0, err
-	}
-	if start_time > end_time {
+	if start_time >= end_time {
 		return 0, 0, errors.New("Invalid time range")
 	}
 	return start_time, end_time, nil
