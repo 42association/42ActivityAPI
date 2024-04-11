@@ -9,6 +9,7 @@ paths:
   /users:
     post:
       summary: "ユーザの追加"
+      description: "intra名とuidやwalletアドレスを追加します"
       requestBody:
         required: true
         content:
@@ -30,6 +31,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    put:
+      summary: "ユーザの編集"
+      description: "intra名に紐づくuidやwalletアドレスを更新します"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserData'
+              required:
+                - login
+      responses:
+        '200':
+          description: "成功。更新したユーザをjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserData'
+        '400':
+          description: "失敗。エラーメッセージをjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /activities:
     post:
       summary: "アクティビティの追加"
@@ -39,6 +64,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ActivityData'
+              required:
+                - mac
+                - uid
       responses:
         '200':
           description: "成功。uidとmacをjsonで返します"
@@ -89,6 +117,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/RoleData'
+              required:
+                - name
       responses:
         '200':
           description: "成功。追加したロールをjsonで返します"
@@ -111,6 +141,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/LocationData'
+              required:
+                - name
       responses:
         '200':
           description: "成功。追加した場所をjsonで返します"
@@ -133,6 +165,10 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/M5StickData'
+              required:
+                - mac
+                - role
+                - location
       responses:
         '200':
           description: "成功。追加したM5Stickをjsonで返します"

@@ -250,3 +250,23 @@ func addUserToDB(uid string, login string, wallet string) error {
 	}
 	return nil
 }
+
+//loginがすでに存在する場合uidとwalletを更新
+func editUserInDB(uid string, login string, wallet string) error {
+	db, err := connectToDB()
+	if err != nil {
+		return err
+	}
+
+	// 同じloginのUserがすでに存在するかを確認
+	var existingUser User
+	if err := db.Where("login = ?", login).First(&existingUser).Error; err != nil {
+		return err
+	}
+
+	// Userを更新
+	if result := db.Model(&existingUser).Updates(User{UID: uid, Wallet: wallet}); result.Error != nil {
+		return result.Error
+	}
+	return nil
+}

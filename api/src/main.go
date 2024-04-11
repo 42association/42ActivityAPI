@@ -87,6 +87,7 @@ func main() {
 	router.POST("/m5sticks", addM5Stick)
 
 	router.POST("/users", addUser)
+	router.PUT("/users", editUser)
 
 	router.Run(":8000")
 }
@@ -297,8 +298,7 @@ func addActivity(c *gin.Context) {
 	}
 	// requestDataが空でないことを確認（MacとUidが非空の文字列）
 	if requestData.Mac == "" || requestData.Uid == "" {
-		// パラメータが空の場合はnullを返す
-		c.JSON(http.StatusOK, nil)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "All parameters are required"})
 		return
 	}
 	db, err := connectToDB()
@@ -341,8 +341,8 @@ func addRole(c *gin.Context) {
 		return
 	}
 	if requestData.Name == "" {
-		// パラメータが空の場合はnullを返す
-		c.JSON(http.StatusOK, nil)
+		// Roleが必須
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Role is required"})
 		return
 	}
 	// データベースにRoleを追加
@@ -363,8 +363,8 @@ func addLocation(c *gin.Context) {
 		return
 	}
 	if requestData.Name == "" {
-		// パラメータが空の場合はnullを返す
-		c.JSON(http.StatusOK, nil)
+		// Locationが必須
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Location is required"})
 		return
 	}
 	// データベースにLocationを追加
@@ -385,8 +385,8 @@ func addM5Stick(c *gin.Context) {
 		return
 	}
 	if requestData.Mac == "" || requestData.RoleName == "" || requestData.LocationName == "" {
-		// パラメータが空の場合はnullを返す
-		c.JSON(http.StatusOK, nil)
+		// すべてのパラメータが必須
+		c.JSON(http.StatusBadRequest, gin.H{"error": "All parameters are required"})
 		return
 	}
 	// データベースにM5Stickを追加
@@ -407,8 +407,8 @@ func addUser(c *gin.Context) {
 		return
 	}
 	if requestData.Login == "" {
-		// パラメータが空の場合はnullを返す
-		c.JSON(http.StatusOK, nil)
+		// Loginは必須
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Login is required"})
 		return
 	}
 	// データベースにUserを追加
@@ -416,6 +416,48 @@ func addUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"uid": requestData.Uid, "login": requestData.Login, "wallet": requestData.Wallet})
+	response := make(gin.H)
+
+	response["login"] = requestData.Login
+	if requestData.Uid != "" {
+		response["uid"] = requestData.Uid
+	}
+	if requestData.Wallet != "" {
+		response["wallet"] = requestData.Wallet
+	}
+
+	c.JSON(http.StatusOK, response)
+	return
+}
+
+func editUser(c *gin.Context) {
+	var requestData UserRequestData
+
+	// JSONリクエストボディを解析してrequestDataに格納
+	if err := c.BindJSON(&requestData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if requestData.Login == "" {
+		// Loginは必須
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Login is required"})
+		return
+	}
+	// DB上のUserを編集
+	if err := editUserInDB(requestData.Uid, requestData.Login, requestData.Wallet); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	response := make(gin.H)
+
+	response["login"] = requestData.Login
+	if requestData.Uid != "" {
+		response["uid"] = requestData.Uid
+	}
+	if requestData.Wallet != "" {
+		response["wallet"] = requestData.Wallet
+	}
+
+	c.JSON(http.StatusOK, response)
 	return
 }
