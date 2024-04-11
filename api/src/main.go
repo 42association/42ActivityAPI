@@ -41,8 +41,8 @@ type LocationRequestData struct {
 
 type M5StickRequestData struct {
 	Mac string `json:"mac"`
-	RoleId int `json:"role_id"`
-	LocationId int `json:"location_id"`
+	RoleName string `json:"role"`
+	LocationName string `json:"location"`
 }
 
 type UserData struct {
@@ -377,16 +377,16 @@ func addM5Stick(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if requestData.Mac == "" || requestData.RoleId <= 0 || requestData.LocationId <= 0 {
+	if requestData.Mac == "" || requestData.RoleName == "" || requestData.LocationName == "" {
 		// パラメータが空の場合はnullを返す
 		c.JSON(http.StatusOK, nil)
 		return
 	}
 	// データベースにM5Stickを追加
-	if err := addM5StickToDB(requestData.Mac, requestData.RoleId, requestData.LocationId); err != nil {
+	if err := addM5StickToDB(requestData.Mac, requestData.RoleName, requestData.LocationName); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"mac": requestData.Mac, "role_id": requestData.RoleId, "location_id": requestData.LocationId})
+	c.JSON(http.StatusOK, gin.H{"mac": requestData.Mac, "role": requestData.RoleName, "location": requestData.LocationName})
 	return
 }

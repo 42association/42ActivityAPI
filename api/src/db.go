@@ -188,7 +188,7 @@ func addLocationToDB(locationName string) error {
 	return nil
 }
 
-func addM5StickToDB(mac string, roleId int, locationId int) error {
+func addM5StickToDB(mac string, roleName string, locationName string) error {
 	db, err := connectToDB()
 	if err != nil {
 		return err
@@ -203,6 +203,20 @@ func addM5StickToDB(mac string, roleId int, locationId int) error {
 	} else {
 		return errors.New("M5Stick already exists")
 	}
+	// roleNameからRoleIdを取得
+	var role Role
+	if err := db.Where("name = ?", roleName).First(&role).Error; err != nil {
+		return err
+	}
+	roleId := role.ID
+
+	// locationNameからLocationIdを取得
+	var location Location
+	if err := db.Where("name = ?", locationName).First(&location).Error; err != nil {
+		return err
+	}
+	locationId := location.ID
+
 	m5Stick := M5Stick{Mac: mac, RoleId: roleId, LocationId: locationId}
 
 	// データベースにM5Stickを追加
