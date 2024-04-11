@@ -35,6 +35,16 @@ type RoleRequestData struct {
 	Name string `json:"name"`
 }
 
+type LocationRequestData struct {
+	Name string `json:"name"`
+}
+
+type M5StickRequestData struct {
+	Mac string `json:"mac"`
+	RoleId int `json:"role_id"`
+	LocationId int `json:"location_id"`
+}
+
 type UserData struct {
 	IntraName string `json:"intra_name"`
 }
@@ -63,8 +73,8 @@ func main() {
 
 	router.POST("/activities", addActivity)
 	router.POST("/roles", addRole)
-	// router.POST("/locations", addLocation)
-	// router.POST("/m5sticks", addM5Stick)
+	router.POST("/locations", addLocation)
+	router.POST("/m5sticks", addM5Stick)
 
 	router.GET("/activities/cleanings", getCleanDataHandler)
 
@@ -332,5 +342,49 @@ func addRole(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"name": requestData.Name})
+	return
+}
+
+func addLocation(c *gin.Context) {
+	var requestData LocationRequestData
+
+	// JSONリクエストボディを解析してrequestDataに格納
+	if err := c.BindJSON(&requestData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if requestData.Name == "" {
+		// パラメータが空の場合はnullを返す
+		c.JSON(http.StatusOK, nil)
+		return
+	}
+	// データベースにLocationを追加
+	if err := addLocationToDB(requestData.Name); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"name": requestData.Name})
+	return
+}
+
+func addM5Stick(c *gin.Context) {
+	var requestData M5StickRequestData
+
+	// JSONリクエストボディを解析してrequestDataに格納
+	if err := c.BindJSON(&requestData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if requestData.Mac == "" || requestData.RoleId <= 0 || requestData.LocationId <= 0 {
+		// パラメータが空の場合はnullを返す
+		c.JSON(http.StatusOK, nil)
+		return
+	}
+	// データベースにM5Stickを追加
+	if err := addM5StickToDB(requestData.Mac, requestData.RoleId, requestData.LocationId); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"mac": requestData.Mac, "role_id": requestData.RoleId, "location_id": requestData.LocationId})
 	return
 }

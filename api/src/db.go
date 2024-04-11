@@ -155,11 +155,58 @@ func addRoleToDB(roleName string) error {
 	} else {
 		return errors.New("Role already exists")
 	}
-	// 新しいRoleを作成
 	role := Role{Name: roleName}
 
 	// データベースにRoleを追加
 	if result := db.Create(&role); result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+func addLocationToDB(locationName string) error {
+	db, err := connectToDB()
+	if err != nil {
+		return err
+	}
+
+	// 同じ名前のLocationがすでに存在するかを確認
+	var existingLocation Location
+	if err := db.Where("name = ?", locationName).First(&existingLocation).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			return err
+		}
+	} else {
+		return errors.New("Location already exists")
+	}
+	location := Location{Name: locationName}
+
+	// データベースにLocationを追加
+	if result := db.Create(&location); result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+func addM5StickToDB(mac string, roleId int, locationId int) error {
+	db, err := connectToDB()
+	if err != nil {
+		return err
+	}
+
+	// 同じMACアドレスのM5Stickがすでに存在するかを確認
+	var existingM5Stick M5Stick
+	if err := db.Where("mac = ?", mac).First(&existingM5Stick).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			return err
+		}
+	} else {
+		return errors.New("M5Stick already exists")
+	}
+	m5Stick := M5Stick{Mac: mac, RoleId: roleId, LocationId: locationId}
+
+	// データベースにM5Stickを追加
+	if result := db.Create(&m5Stick); result.Error != nil {
 		return result.Error
 	}
 	return nil
