@@ -35,14 +35,14 @@ paths:
       parameters:
         - name: start
           in: query
-          required: true
-          description: "絞り込む期間の開始時刻(Unix秒)"
-          schema: {type: string, example: '1711966578'}
+          required: false
+          description: "絞り込む期間の開始時刻(Unix秒)、未指定の場合は現在の日付の午前0時"
+          schema: {type: string, example: '1711966578', default: '1711897200'}
         - name: end
           in: query
-          required: true
-          description: "絞り込む期間の終了時刻(Unix秒)"
-          schema: {type: string, example: '1713176178'}
+          required: false
+          description: "絞り込む期間の終了時刻(Unix秒)、未指定の場合はstart+24時間"
+          schema: {type: string, example: '1713176178', default: '1711983600'}
       responses:
         '200':
           description: "成功。掃除データをjsonで返します"
