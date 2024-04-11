@@ -7,6 +7,7 @@ import (
 	"time"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"errors"
 )
 
 type User struct {
@@ -137,4 +138,29 @@ func getActivitiesFromDB(start_time int64, end_time int64, role string) ([]Activ
 		return nil, err
 	}
 	return activities, nil
+}
+
+func addRoleToDB(roleName string) error {
+	db, err := connectToDB()
+	if err != nil {
+		return err
+	}
+
+	// 同じ名前のRoleがすでに存在するかを確認
+	var existingRole Role
+	if err := db.Where("name = ?", roleName).First(&existingRole).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			return err
+		}
+	} else {
+		return errors.New("Role already exists")
+	}
+	// 新しいRoleを作成
+	role := Role{Name: roleName}
+
+	// データベースにRoleを追加
+	if result := db.Create(&role); result.Error != nil {
+		return result.Error
+	}
+	return nil
 }

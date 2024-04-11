@@ -31,6 +31,10 @@ type ActivityRequestData struct {
 	Uid string `json:"uid"`
 }
 
+type RoleRequestData struct {
+	Name string `json:"name"`
+}
+
 type UserData struct {
 	IntraName string `json:"intra_name"`
 }
@@ -56,7 +60,11 @@ func main() {
 	router.GET("/:uid", RedirectToIndexWithUID)
 	router.GET("/callback", ShowCallbackPage)
 	router.POST("/receive-uid", HandleUIDSubmission)
+
 	router.POST("/activities", addActivity)
+	router.POST("/roles", addRole)
+	// router.POST("/locations", addLocation)
+	// router.POST("/m5sticks", addM5Stick)
 
 	router.GET("/activities/cleanings", getCleanDataHandler)
 
@@ -302,5 +310,27 @@ func addActivity(c *gin.Context) {
 	// 取得したuserDataを含めてレスポンスを返す
 	c.JSON(http.StatusOK, gin.H{
 		"uid": requestData.Uid, "mac": requestData.Mac})
+	return
+}
+
+func addRole(c *gin.Context) {
+	var requestData RoleRequestData
+
+	// JSONリクエストボディを解析してrequestDataに格納
+	if err := c.BindJSON(&requestData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if requestData.Name == "" {
+		// パラメータが空の場合はnullを返す
+		c.JSON(http.StatusOK, nil)
+		return
+	}
+	// データベースにRoleを追加
+	if err := addRoleToDB(requestData.Name); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"name": requestData.Name})
 	return
 }
