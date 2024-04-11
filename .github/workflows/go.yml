@@ -20,6 +20,16 @@ jobs:
       run:
         working-directory: ./api/src
     runs-on: ubuntu-latest
+    env:
+      MARIA_ROOT_PASS: mariadb-root-password"
+      MARIA_NAME: mariadb-database"
+      MARIA_USER: mariadb-user"
+      MARIA_PASS: mariadb-password"
+      MARIA_PORT: 3306"
+      DSN: ${MARIA_USER}:${MARIA_PASS}@tcp(mariadb:${MARIA_PORT})/${MARIA_NAME}?parseTime=true"
+      UID: uid"
+      SECRET: secret"
+      CALLBACK_URL: callback_url"
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go
