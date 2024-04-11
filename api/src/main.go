@@ -72,16 +72,18 @@ func main() {
 	router.POST("/receive-uid", HandleUIDSubmission)
 
 	router.POST("/activities", addActivity)
-	router.POST("/roles", addRole)
-	router.POST("/locations", addLocation)
-	router.POST("/m5sticks", addM5Stick)
+	router.GET("/activities/cleanings", getCleanData)
 
-	router.GET("/activities/cleanings", getCleanDataHandler)
+	router.POST("/roles", addRole)
+
+	router.POST("/locations", addLocation)
+
+	router.POST("/m5sticks", addM5Stick)
 
 	router.Run(":8000")
 }
 
-func getCleanDataHandler(c *gin.Context) {
+func getCleanData(c *gin.Context) {
 	//start_timeとend_timeを取得
 	start_time, end_time, err := getQueryAboutTime(c)
 	if err != nil {
