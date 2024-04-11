@@ -389,4 +389,4 @@ func addM5Stick(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"mac": requestData.Mac, "role": requestData.RoleName, "location": requestData.LocationName})
 	return
-}	
+}
