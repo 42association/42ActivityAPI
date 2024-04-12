@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
 	"strconv"
 	"github.com/jinzhu/now"
 )
@@ -71,6 +72,10 @@ func main() {
 	router := gin.Default()
 
 	router.LoadHTMLGlob("templates/*")
+
+    config := cors.DefaultConfig()
+    config.AllowOrigins = []string{"*"}
+    router.Use(cors.New(config))
 
 	router.GET("/", ShowIndexPage)
 	router.GET("/:uid", RedirectToIndexWithUID)
