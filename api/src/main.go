@@ -94,7 +94,7 @@ func main() {
 	router.POST("/users", addUser)
 	router.PUT("/users", editUser)
 
-	router.Run(":8000")
+	router.Run(":" + os.Getenv("PORT"))
 }
 
 func getCleanData(c *gin.Context) {
