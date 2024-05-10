@@ -78,7 +78,7 @@ func main() {
     router.Use(cors.New(config))
 
 	router.GET("/", ShowIndexPage)
-	router.GET("/:uid", RedirectToIndexWithUID)
+	router.GET("/new", RedirectToIndexWithUID)
 	router.GET("/callback", ShowCallbackPage)
 	router.POST("/receive-uid", HandleUIDSubmission)
 
@@ -171,7 +171,7 @@ func ShowIndexPage(c *gin.Context) {
 }
 
 func RedirectToIndexWithUID(c *gin.Context) {
-	uid := c.Param("uid")
+	uid := c.Query("uid")
 	c.Redirect(http.StatusMovedPermanently, "/?uid="+uid)
 }
 
