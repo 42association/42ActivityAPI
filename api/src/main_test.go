@@ -67,9 +67,9 @@ func TestShowIndexPage(t *testing.T) {
 func TestRedirectToIndexWithUID(t *testing.T) {
 	router := gin.New()
 
-	router.GET("/redirect/:uid", RedirectToIndexWithUID)
+	router.GET("/redirect/new", RedirectToIndexWithUID)
 
-	req, err := http.NewRequest("GET", "/redirect/123", nil)
+	req, err := http.NewRequest("GET", "/redirect/new?uid=123", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
