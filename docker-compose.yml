@@ -7,7 +7,7 @@ services:
       - ./api/src:/code
     working_dir: /code
     ports:
-      - '8000:8000'
+      - "${API_PORT}:${API_PORT}"
     networks:
       - docker-network
     environment:
@@ -15,6 +15,7 @@ services:
       UID: ${UID}
       CALLBACK_URL: ${CALLBACK_URL}
       SECRET: ${SECRET}
+      PORT: ${API_PORT}
     depends_on:
       mariadb:
         condition: service_healthy
