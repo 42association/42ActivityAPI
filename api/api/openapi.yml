@@ -6,6 +6,34 @@ info:
 servers:
   - url: http://localhost:8000
 paths:
+  /shift:
+    get:
+      summary: "シフトの取得"
+      description: "一定期間の間のシフトを担当するUserの配列を返します"
+      parameters:
+        - name: start
+          in: query
+          required: false
+          description: "絞り込む期間の開始時刻(Unix秒)、未指定の場合は現在の日付の午前0時"
+          schema: {type: string, example: '1711966578', default: '1711897200'}
+        - name: end
+          in: query
+          required: false
+          description: "絞り込む期間の終了時刻(Unix秒)、未指定の場合はstart+24時間"
+          schema: {type: string, example: '1713176178', default: '1711983600'}
+      responses:
+        '200':
+          description: "成功。Userの配列をjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/shiftData'
+        '400':
+          description: "失敗。エラーメッセージをjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /users:
     post:
       summary: "ユーザの追加"
@@ -184,6 +212,14 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
+    shiftData:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            type: string
+          example: ["kakiba", "shtanemu", "mamiyaza"]
     ActivityData:
       type: object
       properties:
