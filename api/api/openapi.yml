@@ -215,11 +215,10 @@ components:
     shiftData:
       type: array
       items:
-        type: string
-      example:
-        - "shtanemu"
-        - "kakiba"
-      properties:
+        type: object
+        properties:
+            User:
+              $ref: '#/components/schemas/User'
     ActivityData:
       type: object
       properties:
