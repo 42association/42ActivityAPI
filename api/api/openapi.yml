@@ -213,13 +213,13 @@ paths:
 components:
   schemas:
     shiftData:
-      type: object
+      type: array
+      items:
+        type: string
+      example:
+        - "shtanemu"
+        - "kakiba"
       properties:
-        users:
-          type: array
-          items:
-            type: string
-          example: ["kakiba", "shtanemu", "mamiyaza"]
     ActivityData:
       type: object
       properties:
