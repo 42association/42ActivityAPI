@@ -88,17 +88,17 @@ func getDSN() (string, error) {
 }
 
 func seed(db *gorm.DB) error {
-	shifts := []Shift{{Date: "2024/06/01", UserID: 1}, {Date: "2024/06/02", UserID: 2}}
-	for _, shift := range shifts {
-		if result := db.Create(&shift); result.Error != nil {
-			return result.Error
-		}
-	}
-
 	// Create a new user
 	users := []User{{UID: "foo", Login: "kakiba", Wallet:"0xA0D9F5854A77D4906906BCEDAAEBB3A39D61165A"}, {UID: "bar", Login: "tanemura", Wallet:"42156DF83404D7833BE3DBDB5D1B367964FDF037"}}
 	for _, user := range users {
 		if result := db.Create(&user); result.Error != nil {
+			return result.Error
+		}
+	}
+
+	shifts := []Shift{{Date: "2024/06/01", UserID: 1}, {Date: "2024/06/02", UserID: 2}}
+	for _, shift := range shifts {
+		if result := db.Create(&shift); result.Error != nil {
 			return result.Error
 		}
 	}
