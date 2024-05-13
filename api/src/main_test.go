@@ -109,6 +109,6 @@ func TestShowCallbackPage(t *testing.T) {
 }
 
 func TestGetShiftUsers(t *testing.T) {
-	shifts, _ := getShiftFromDB("2024/06/01")
+	shifts, _ := getShiftFromDB("2024-06-01")
 	assert.Equal(t, "kakiba", shifts[0].User.Login)
 }

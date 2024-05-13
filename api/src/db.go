@@ -96,7 +96,7 @@ func seed(db *gorm.DB) error {
 		}
 	}
 
-	shifts := []Shift{{Date: "2024/06/01", UserID: 1}, {Date: "2024/06/02", UserID: 2}}
+	shifts := []Shift{{Date: "2024-06-01", UserID: 1}, {Date: "2024-06-02", UserID: 2}}
 	for _, shift := range shifts {
 		if result := db.Create(&shift); result.Error != nil {
 			return result.Error
