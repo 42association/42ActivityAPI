@@ -9,18 +9,13 @@ paths:
   /shift:
     get:
       summary: "シフトの取得"
-      description: "一定期間の間のシフトを担当するUserの配列を返します"
+      description: "特定の日付のシフトを担当するUserの配列を返します"
       parameters:
-        - name: start
+        - name: date
           in: query
           required: false
-          description: "絞り込む期間の開始時刻(Unix秒)、未指定の場合は現在の日付の午前0時"
-          schema: {type: string, example: '1711966578', default: '1711897200'}
-        - name: end
-          in: query
-          required: false
-          description: "絞り込む期間の終了時刻(Unix秒)、未指定の場合はstart+24時間"
-          schema: {type: string, example: '1713176178', default: '1711983600'}
+          description: "絞り込む日付、未指定の場合は現在の日付"
+          schema: {type: string, example: 2024/05/01}
       responses:
         '200':
           description: "成功。Userの配列をjsonで返します"
