@@ -137,6 +137,18 @@ func seed(db *gorm.DB) error {
 	return nil
 }
 
+func getShiftFromDB(date string) ([]Shift, error) {
+	db, err := connectToDB()
+	if err != nil {
+		return nil, err
+	}
+	var shifts []Shift
+    if err := db.Preload("User").Where("date = ?", date).Find(&shifts).Error; err != nil {
+        return nil, err
+    }
+	return shifts, nil
+}
+
 func getActivitiesFromDB(start_time int64, end_time int64, role string) ([]Activity, error) {
 	db, err := connectToDB()
 	if err != nil {
