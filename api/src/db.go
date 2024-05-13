@@ -13,7 +13,7 @@ import (
 type Shift struct {
 	ID	uint   `gorm:"primaryKey"`
 	Date  string
-	UserID uint
+	UserID uint `json: "user_id"`
 	User  User `gorm:"foreignKey:UserID"`
 }
 
