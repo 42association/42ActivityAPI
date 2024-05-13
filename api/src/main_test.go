@@ -107,3 +107,8 @@ func TestShowCallbackPage(t *testing.T) {
 
 	assert.Equal(t, "text/html; charset=utf-8", w.Header().Get("Content-Type"))
 }
+
+func TestGetShiftUsers(t *testing.T) {
+	shifts, _ := getShiftFromDB("2024/06/01")
+	assert.Equal(t, "kakiba", shifts[0].User.Login)
+}
