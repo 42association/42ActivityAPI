@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
+	"regexp"
 	"io"
 	"log"
 	"net/http"
@@ -82,6 +84,8 @@ func main() {
 	router.GET("/callback", ShowCallbackPage)
 	router.POST("/receive-uid", HandleUIDSubmission)
 
+	router.GET("/shift", getShiftData)
+
 	router.POST("/activities", addActivity)
 	router.GET("/activities/cleanings", getCleanData)
 
@@ -95,6 +99,22 @@ func main() {
 	router.PUT("/users", editUser)
 
 	router.Run(":" + os.Getenv("PORT"))
+}
+
+func getShiftData(c *gin.Context) {
+	date, err := getQueryAboutDate(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid query"})
+		return
+	}
+
+	//roleがcleaningのactivityを取得
+	shifts, err := getShiftFromDB(date)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get shift"})
+		return
+	}
+	c.JSON(http.StatusOK, shifts)
 }
 
 func getCleanData(c *gin.Context) {
@@ -113,6 +133,7 @@ func getCleanData(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, Activities)
 }
+
 func getQueryAboutDate(c *gin.Context) (string, error) {
 	date := c.Query("date")
 	if date == "" {
