@@ -212,8 +212,8 @@ components:
       items:
         type: object
         properties:
-            User:
-              $ref: '#/components/schemas/User'
+            Shift:
+              $ref: '#/components/schemas/Shift'
     ActivityData:
       type: object
       properties:
@@ -239,6 +239,14 @@ components:
         UID: {type: string, example: "foo"}
         Login: {type: string, example: "kakiba"}
         Wallet: {type: string, example: "0xA0D9F5854A77D4906906BCEDAAEBB3A39D61165A"}
+    Shift:
+      type: object
+      properties:
+        ID: {type: integer, example: 1}
+        Date: {type: string, example: "2024/05/01"}
+        UserID: {type: integer, example: 1}
+        User:
+          $ref: '#/components/schemas/User'
     M5Stick:
       type: object
       properties:
