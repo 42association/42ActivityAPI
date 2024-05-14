@@ -137,9 +137,9 @@ func getCleanData(c *gin.Context) {
 func getQueryAboutDate(c *gin.Context) (string, error) {
 	date := c.Query("date")
 	if date == "" {
-		date = time.Now().Format("2006/01/02")
+		date = time.Now().Format("2006-01-02")
 	}
-	if !regexp.MustCompile(`^\d{4}/\d{2}/\d{2}$`).MatchString(date) {
+	if !regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`).MatchString(date) {
 		return "", errors.New("Invalid date format. It should be in YYYY/MM/DD format")
 	}
 	return date, nil
