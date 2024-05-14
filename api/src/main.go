@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"gorm.io/gorm"
 	"errors"
 	"fmt"
 	"time"
@@ -345,14 +346,24 @@ func addActivity(c *gin.Context) {
 	}
 	user := User{}
 	if err := db.Where("uid = ?", requestData.Uid).First(&user).Error; err != nil {
-		log.Fatal("Failed to get user:", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		if err == gorm.ErrRecordNotFound {
+			log.Println("User not found:", err)
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		} else {
+			log.Println("Failed to get user:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user"})
+		}
 		return
 	}
 	m5Stick := M5Stick{}
 	if err := db.Where("mac = ?", requestData.Mac).First(&m5Stick).Error; err != nil {
-		log.Fatal("Failed to get M5Stick:", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		if err == gorm.ErrRecordNotFound {
+			log.Println("M5Stick not found:", err)
+			c.JSON(http.StatusNotFound, gin.H{"error": "M5Stick not found"})
+		} else {
+			log.Println("Failed to get M5Stick:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get M5Stick"})
+		}
 		return
 	}
 	// Add a new activity
