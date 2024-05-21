@@ -33,6 +33,8 @@ services:
       MARIADB_USER: ${MARIA_USER}
       MARIADB_PASSWORD: ${MARIA_PASS}
       TZ: 'Asia/Tokyo'
+    volumes:
+      - mariadb:/var/lib/mysql
     healthcheck:
       test: mariadb-check --databases $MARIA_NAME -u $MARIA_USER -p$MARIA_PASS
       interval: 5s
@@ -46,6 +48,8 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
+volumes:
+  mariadb:
 networks:
   docker-network:
     driver: bridge
