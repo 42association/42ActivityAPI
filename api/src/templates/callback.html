@@ -6,7 +6,6 @@
     <title>Document</title>
 </head>
 <body>
-    callback
     <div id="responseOutput"></div> <!-- 応答を表示するための要素 -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -29,15 +28,16 @@
                     },
                     body: JSON.stringify({ uid, code }), // ここでCODEを含める
                 })
-                .then(response => response.json())
-                .then(data => {
-                    console.log({message:"test",data});
-                    // 応答をHTML要素に出力
-                    document.getElementById('responseOutput').innerText = JSON.stringify(data, null, 2);
+                .then(response => {
+                    if (response.status === 200) {
+                        alert("NFCタグとログインの紐付けが完了しました。ブラウザを閉じてください。");
+                    } else {
+                        alert("NFCタグとログインの紐付けに失敗しました。管理者に問い合わせてください。");
+                    }
                 })
                 .catch(error => {
+                    alert("NFCタグとログインの紐付けに失敗しました。管理者に問い合わせてください。");
                     console.error('Error:', error);
-                    document.getElementById('responseOutput').innerText = 'Error: ' + error.toString();
                 });
             }
         });
