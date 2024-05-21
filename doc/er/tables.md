@@ -3,11 +3,18 @@
 ```mermaid
 erDiagram
 
+    USER ||--o{ SHIFT : shift
     USER ||--o{ ACTIVITY : activity
     USER {
         int id
         string uid
         string login
+    }
+
+    SHIFT {
+        int id
+        string date
+        int user_id
     }
 
     LOCATION ||--o| M5STICK : setup

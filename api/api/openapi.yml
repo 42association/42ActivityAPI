@@ -6,6 +6,29 @@ info:
 servers:
   - url: http://localhost:8000
 paths:
+  /shift:
+    get:
+      summary: "シフトの取得"
+      description: "特定の日付のシフトを担当するUserの配列を返します"
+      parameters:
+        - name: date
+          in: query
+          required: false
+          description: "絞り込む日付、未指定の場合は現在の日付"
+          schema: {type: string, example: "2024-05-01"}
+      responses:
+        '200':
+          description: "成功。Userの配列をjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/shiftData'
+        '400':
+          description: "失敗。エラーメッセージをjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /users:
     post:
       summary: "ユーザの追加"
@@ -184,6 +207,13 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
+    shiftData:
+      type: array
+      items:
+        type: object
+        properties:
+            Shift:
+              $ref: '#/components/schemas/Shift'
     ActivityData:
       type: object
       properties:
@@ -209,6 +239,14 @@ components:
         UID: {type: string, example: "foo"}
         Login: {type: string, example: "kakiba"}
         Wallet: {type: string, example: "0xA0D9F5854A77D4906906BCEDAAEBB3A39D61165A"}
+    Shift:
+      type: object
+      properties:
+        ID: {type: integer, example: 1}
+        Date: {type: string, example: "2024-05-01"}
+        UserID: {type: integer, example: 1}
+        User:
+          $ref: '#/components/schemas/User'
     M5Stick:
       type: object
       properties:

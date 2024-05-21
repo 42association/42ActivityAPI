@@ -2,8 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"gorm.io/gorm"
 	"errors"
 	"fmt"
+	"time"
+	"regexp"
 	"io"
 	"log"
 	"net/http"
@@ -82,6 +85,8 @@ func main() {
 	router.GET("/callback", ShowCallbackPage)
 	router.POST("/receive-uid", HandleUIDSubmission)
 
+	router.GET("/shift", getShiftData)
+
 	router.POST("/activities", addActivity)
 	router.GET("/activities/cleanings", getCleanData)
 
@@ -95,6 +100,22 @@ func main() {
 	router.PUT("/users", editUser)
 
 	router.Run(":" + os.Getenv("PORT"))
+}
+
+func getShiftData(c *gin.Context) {
+	date, err := getQueryAboutDate(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid query"})
+		return
+	}
+
+	//roleがcleaningのactivityを取得
+	shifts, err := getShiftFromDB(date)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get shift"})
+		return
+	}
+	c.JSON(http.StatusOK, shifts)
 }
 
 func getCleanData(c *gin.Context) {
@@ -112,6 +133,17 @@ func getCleanData(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, Activities)
+}
+
+func getQueryAboutDate(c *gin.Context) (string, error) {
+	date := c.Query("date")
+	if date == "" {
+		date = time.Now().Format("2006-01-02")
+	}
+	if !regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`).MatchString(date) {
+		return "", errors.New("Invalid date format. It should be in YYYY/MM/DD format")
+	}
+	return date, nil
 }
 
 func getQueryAboutTime(c *gin.Context) (int64, int64, error) {
@@ -314,14 +346,24 @@ func addActivity(c *gin.Context) {
 	}
 	user := User{}
 	if err := db.Where("uid = ?", requestData.Uid).First(&user).Error; err != nil {
-		log.Fatal("Failed to get user:", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		if err == gorm.ErrRecordNotFound {
+			log.Println("User not found:", err)
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		} else {
+			log.Println("Failed to get user:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user"})
+		}
 		return
 	}
 	m5Stick := M5Stick{}
 	if err := db.Where("mac = ?", requestData.Mac).First(&m5Stick).Error; err != nil {
-		log.Fatal("Failed to get M5Stick:", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		if err == gorm.ErrRecordNotFound {
+			log.Println("M5Stick not found:", err)
+			c.JSON(http.StatusNotFound, gin.H{"error": "M5Stick not found"})
+		} else {
+			log.Println("Failed to get M5Stick:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get M5Stick"})
+		}
 		return
 	}
 	// Add a new activity
