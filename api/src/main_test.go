@@ -4,13 +4,27 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/gin-gonic/gin"
+	"gorm.io/driver/sqlite"
+	_ "modernc.org/sqlite"
+	"gorm.io/gorm"
 	"net/http/httptest"
 	"net/http"
 	"os"
 )
 
+func setupTestDB() *gorm.DB {
+	var db *gorm.DB
+	var err error
+	db, err = gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database")
+	}
+	db.AutoMigrate(&Shift{}, &User{}, &M5Stick{}, &Activity{}, &Location{}, &Role{})
+	return db
+}
+
 func TestMain(m *testing.M) {
-	db, _ := initializeDB();
+	db := setupTestDB()
 	seed(db)
 	code := m.Run()
 	os.Exit(code)
