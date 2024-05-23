@@ -112,3 +112,8 @@ func TestGetShiftUsers(t *testing.T) {
 	shifts, _ := getShiftFromDB("2024-06-01")
 	assert.Equal(t, "kakiba", shifts[0].User.Login)
 }
+
+func TestAddDuplicated(t *testing.T) {
+	assert.Equal(t, true, userExists("kakiba"))
+	assert.Equal(t, false, userExists("anonymous"))
+}

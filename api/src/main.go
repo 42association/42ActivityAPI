@@ -66,11 +66,10 @@ type Config struct {
 }
 
 func main() {
-	db, err := initializeDB();
+	_, err := initializeDB();
 	if err != nil {
 		log.Fatal("Failed to initialize database:", err)
 	}
-	seed(db)
 
 	router := gin.Default()
 
@@ -212,7 +211,7 @@ func ShowCallbackPage(c *gin.Context) {
 }
 
 // Uid, Codeを受け取り、intraのユーザー情報を取得してデータベースに保存
-// handleRoot関数内でfetchUserDataから返されるintraLoginをレスポンスとして返す
+// addUserToDBから返されるintraLoginをレスポンスとして返す
 func HandleUIDSubmission(c *gin.Context) {
 	var requestData RequestData
 
@@ -222,35 +221,37 @@ func HandleUIDSubmission(c *gin.Context) {
 		return
 	}
 
-	// requestDataが空でないことを確認（CodeとUidが非空の文字列）
-	if requestData.Code != "" && requestData.Uid != "" {
-		fmt.Printf("Code: %s, Uid: %s\n", requestData.Code, requestData.Uid)
-		token := exchangeCodeForToken(requestData.Code)
-		if token != nil {
-			userData, err := fetchUserData(token.AccessToken)
-			if err != nil {
-				// エラーハンドリング
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user data"})
-				return
-			}
-
-			db, err := connectToDB()
-			if err != nil {
-				log.Fatal("Failed to initialize database:", err)
-			}
-			// 新しいユーザーを挿入
-			db.Create(&User{UID: requestData.Uid, Login: userData.IntraName})
-			// 取得したuserDataを含めてレスポンスを返す
-			c.JSON(http.StatusOK, gin.H{
-				// "code": requestData.Code,
-				"uid": requestData.Uid, "intra_login": userData.IntraName})
-			return
-		}
-		c.JSON(http.StatusOK, nil)
-	} else {
-		// パラメータが空の場合はnullを返す
-		c.JSON(http.StatusOK, nil)
+	if requestData.Code == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Code is required"})
+		return
 	}
+
+	token := exchangeCodeForToken(requestData.Code)
+	if token == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Code is invalid"})
+		return
+	}
+	userData, err := fetchUserData(token.AccessToken)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get user infomation"})
+		return
+	}
+	if userExists(userData.IntraName) {
+		c.JSON(http.StatusConflict, gin.H{"error": "User with this login already exists"})
+		return
+	}
+	if err := addUserToDB(requestData.Uid, userData.IntraName, ""); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	response := make(gin.H)
+
+	response["login"] = userData.IntraName
+	response["uid"] = requestData.Uid
+
+	c.JSON(http.StatusOK, response)
+	return
 }
 
 func exchangeCodeForToken(code string) *Token {
@@ -456,6 +457,10 @@ func addUser(c *gin.Context) {
 	if requestData.Login == "" {
 		// Loginは必須
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Login is required"})
+		return
+	}
+	if userExists(requestData.Login) {
+		c.JSON(http.StatusConflict, gin.H{"error": "User with this login already exists"})
 		return
 	}
 	// データベースにUserを追加

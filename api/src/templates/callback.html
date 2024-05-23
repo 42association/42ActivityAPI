@@ -31,6 +31,8 @@
                 .then(response => {
                     if (response.status === 200) {
                         alert("NFCタグとログインの紐付けが完了しました。ブラウザを閉じてください。");
+                    } else if (response.status === 409) {
+                        alert("既に登録されているログインです。ブラウザを閉じてださい。");
                     } else {
                         alert("NFCタグとログインの紐付けに失敗しました。管理者に問い合わせてください。");
                     }
