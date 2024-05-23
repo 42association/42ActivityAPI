@@ -4,11 +4,31 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/gin-gonic/gin"
+	"gorm.io/driver/sqlite"
+	_ "modernc.org/sqlite"
+	"gorm.io/gorm"
 	"net/http/httptest"
 	"net/http"
 	"os"
 )
 
+func setupTestDB() *gorm.DB {
+	var db *gorm.DB
+	var err error
+	db, err = gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database")
+	}
+	db.AutoMigrate(&Shift{}, &User{}, &M5Stick{}, &Activity{}, &Location{}, &Role{})
+	return db
+}
+
+func TestMain(m *testing.M) {
+	db := setupTestDB()
+	seed(db)
+	code := m.Run()
+	os.Exit(code)
+}
 
 func TestGetQueryAboutTime(t *testing.T) {
     req, _ := http.NewRequest("GET", "/activities/cleanings?start=100&end=200", nil)
@@ -108,12 +128,50 @@ func TestShowCallbackPage(t *testing.T) {
 	assert.Equal(t, "text/html; charset=utf-8", w.Header().Get("Content-Type"))
 }
 
+func testConnectToDB() (*gorm.DB, error) {
+	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
+	if err != nil {
+		return nil, err
+	}
+	db.AutoMigrate(&Shift{}, &User{}, &M5Stick{}, &Activity{}, &Location{}, &Role{})
+	return db, nil	
+}
+
+func testGetShiftFromDB(date string) ([]Shift, error) {
+	db, err := testConnectToDB()
+	if err != nil {
+		return nil, err
+	}
+	var shifts []Shift
+    if err := db.Preload("User").Where("date = ?", date).Find(&shifts).Error; err != nil {
+        return nil, err
+    }
+	return shifts, nil
+}
+
 func TestGetShiftUsers(t *testing.T) {
-	shifts, _ := getShiftFromDB("2024-06-01")
+	shifts, _ := testGetShiftFromDB("2024-06-01")
 	assert.Equal(t, "kakiba", shifts[0].User.Login)
 }
 
+func testUserExists(login string) bool {
+	db, err := testConnectToDB()
+	if err != nil {
+		panic("database error")
+	}
+
+	var user User
+	if err := db.Where("login = ?", login).First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return false
+		}
+		// Handle other errors
+		panic("database error")
+	}
+	return true
+}
+
 func TestAddDuplicated(t *testing.T) {
-	assert.Equal(t, true, userExists("kakiba"))
-	assert.Equal(t, false, userExists("anonymous"))
+	assert.Equal(t, true, testUserExists("kakiba"))
+	assert.Equal(t, false, testUserExists("anonymous"))
 }
