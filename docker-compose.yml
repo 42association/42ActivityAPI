@@ -1,6 +1,8 @@
 services:
   api:
-    image: golang:1.22.1-alpine3.19
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: api
     tty: true
     volumes:
@@ -16,6 +18,7 @@ services:
       CALLBACK_URL: ${CALLBACK_URL}
       SECRET: ${SECRET}
       PORT: ${API_PORT}
+      CGO_ENABLED: 1
     depends_on:
       mariadb:
         condition: service_healthy
