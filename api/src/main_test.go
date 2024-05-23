@@ -9,6 +9,12 @@ import (
 	"os"
 )
 
+func TestMain(m *testing.M) {
+	db, _ := initializeDB();
+	seed(db)
+	code := m.Run()
+	os.Exit(code)
+}
 
 func TestGetQueryAboutTime(t *testing.T) {
     req, _ := http.NewRequest("GET", "/activities/cleanings?start=100&end=200", nil)
