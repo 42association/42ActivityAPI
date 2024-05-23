@@ -66,11 +66,10 @@ type Config struct {
 }
 
 func main() {
-	db, err := initializeDB();
+	_, err := initializeDB();
 	if err != nil {
 		log.Fatal("Failed to initialize database:", err)
 	}
-	seed(db)
 
 	router := gin.Default()
 
@@ -224,8 +223,8 @@ func HandleUIDSubmission(c *gin.Context) {
 
 	if requestData.Code == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Code is required"})
-				return
-			}
+		return
+	}
 
 	token := exchangeCodeForToken(requestData.Code)
 	if token == nil {
@@ -233,14 +232,14 @@ func HandleUIDSubmission(c *gin.Context) {
 		return
 	}
 	userData, err := fetchUserData(token.AccessToken)
-			if err != nil {
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get user infomation"})
 		return
-			}
+	}
 	if userExists(userData.IntraName) {
 		c.JSON(http.StatusConflict, gin.H{"error": "User with this login already exists"})
-			return
-		}
+		return
+	}
 	if err := addUserToDB(requestData.Uid, userData.IntraName, ""); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
