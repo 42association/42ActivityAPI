@@ -296,3 +296,20 @@ func editUserInDB(uid string, login string, wallet string) error {
 	}
 	return nil
 }
+
+func userExists(login string) bool {
+	db, err := connectToDB()
+	if err != nil {
+		panic("database error")
+	}
+
+	var user User
+	if err := db.Where("login = ?", login).First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return false
+		}
+		// Handle other errors
+		panic("database error")
+	}
+	return true
+}
