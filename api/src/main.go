@@ -458,6 +458,10 @@ func addUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Login is required"})
 		return
 	}
+	if userExists(requestData.Login) {
+		c.JSON(http.StatusConflict, gin.H{"error": "User with this login already exists"})
+		return
+	}
 	// データベースにUserを追加
 	if err := addUserToDB(requestData.Uid, requestData.Login, requestData.Wallet); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
