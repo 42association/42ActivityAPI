@@ -237,12 +237,15 @@ func HandleUIDSubmission(c *gin.Context) {
 		return
 	}
 	if userExists(userData.IntraName) {
-		c.JSON(http.StatusConflict, gin.H{"error": "User with this login already exists"})
-		return
-	}
-	if err := addUserToDB(requestData.Uid, userData.IntraName, ""); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		if addUidToExistUser(userData.IntraName, requestData.Uid) == false {
+			c.JSON(http.StatusConflict, gin.H{"error": "User with this login is already associated with a uid"})
+			return
+		}
+	} else {
+		if err := addUserToDB(requestData.Uid, userData.IntraName, ""); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 	}
 
 	response := make(gin.H)

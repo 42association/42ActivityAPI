@@ -313,3 +313,25 @@ func userExists(login string) bool {
 	}
 	return true
 }
+
+func addUidToExistUser(login string, uid string) bool {
+	db, err := connectToDB()
+	if err != nil {
+		panic("database error")
+	}
+
+	var user User
+	// uidが空のloginを検索
+	if err := db.Where("login = ? AND uid = ?", login, "").First(&user).Error; err != nil {
+		// uidが空のloginがなければfalse
+		if err == gorm.ErrRecordNotFound {
+			return false
+		}
+		// Handle other errors
+		panic("database error")
+	}
+	if err := db.Model(&user).Update("uid", uid).Error; err != nil {
+		panic("database error")
+	}
+	return true
+}
