@@ -239,12 +239,24 @@ components:
             Shift:
               $ref: '#/components/schemas/Shift'
     importShiftData:
-      type: object
-      properties:
-        shift: {type: array, example: [
-          {date: "2024-05-01", logins: ["tkanda", "jkobayas", "kyamagis", "tatwatan", "yuohno", "mogawa", "sumurata"]}, 
-          {date: "2024-05-02", logins: ["snara", "mmakinou", "fwatanab", "kyamagis", "toshota", "kemizuki", "misuzuki"]}
-          ]}
+      type: array
+      items:
+        type: object
+        properties:
+          date:
+            type: string
+            format: date
+            example: "2024-05-01"
+          login:
+            type: array
+            items:
+              type: string
+            example: ["user1", "user2"]
+      example:
+        - date: "2024-05-01"
+          login: ["user1", "user2"]
+        - date: "2024-05-02"
+          login: ["user3", "user4"]
     addedDate:
       type: object
       properties:
