@@ -29,6 +29,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    post:
+      summary: "シフトの追加"
+      description: "日付とそれに対応した複数loginをDBに反映する"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/importShiftData'
+              required:
+                - shift
+      responses:
+        '200':
+          description: "成功。追加した日付一覧をjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/addedDate'
+        '400':
+          description: "失敗。エラーメッセージをjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /users:
     post:
       summary: "ユーザの追加"
@@ -214,6 +238,17 @@ components:
         properties:
             Shift:
               $ref: '#/components/schemas/Shift'
+    importShiftData:
+      type: object
+      properties:
+        shift: {type: array, example: [
+          {date: "2024-05-01", logins: ["tkanda", "jkobayas", "kyamagis", "tatwatan", "yuohno", "mogawa", "sumurata"]}, 
+          {date: "2024-05-02", logins: ["snara", "mmakinou", "fwatanab", "kyamagis", "toshota", "kemizuki", "misuzuki"]}
+          ]}
+    addedDate:
+      type: object
+      properties:
+        date: {type: array, example: ["2024-05-01", "2024-05-02"]}
     ActivityData:
       type: object
       properties:
