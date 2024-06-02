@@ -55,6 +55,15 @@ type M5StickRequestData struct {
 	LocationName string `json:"location"`
 }
 
+type Schedule struct {
+	date string
+	login []string
+}
+
+type ShiftRequestData struct {
+	Shift []Schedule `json:"shift"`
+}
+
 type UserData struct {
 	IntraName string `json:"intra_name"`
 }
@@ -85,6 +94,7 @@ func main() {
 	router.POST("/receive-uid", HandleUIDSubmission)
 
 	router.GET("/shift", getShiftData)
+	// router.POST("/shift", addShiftData)
 
 	router.POST("/activities", addActivity)
 	router.GET("/activities/cleanings", getCleanData)
@@ -115,6 +125,25 @@ func getShiftData(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, shifts)
+}
+
+func addShiftData(c *gin.Context) {
+	var requestData ShiftRequestData
+
+	if err := c.BindJSON(&requestData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if len(requestData.Shift) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Shift is required"})
+		return
+	}
+	if date, err := addShiftToDB(requestData.Shift); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{"date": date})
+	}
 }
 
 func getCleanData(c *gin.Context) {

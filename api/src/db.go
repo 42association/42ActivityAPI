@@ -13,7 +13,7 @@ import (
 type Shift struct {
 	ID	uint   `gorm:"primaryKey"`
 	Date  string
-	UserID uint `json: "user_id"`
+	UserID int `json: "user_id"`
 	User  User `gorm:"foreignKey:UserID"`
 }
 
@@ -55,6 +55,10 @@ type Location struct {
 type Role struct {
 	ID int
 	Name string
+}
+
+type Date struct {
+	Date string
 }
 
 func initializeDB() (*gorm.DB, error) {
@@ -334,4 +338,50 @@ func addUidToExistUser(login string, uid string) bool {
 		panic("database error")
 	}
 	return true
+}
+
+func addShiftToDB(schedule []Schedule) ([]string, error) {
+	db, err := connectToDB()
+	if err != nil {
+		panic("database error")
+	}
+
+	var addedDate []string
+
+	for _, s := range schedule {
+		if s.date == "" || len(s.login)	== 0 {
+			continue
+		}
+		for _, l := range s.login {
+			// loginからUserIDを取得
+			userId, err := getUserIdFromLogin(db, l)
+			if err != nil {
+				return nil, err
+			}
+			// s.dateとloginが一致するシフトがすでに存在した場合はスキップ
+			var shift Shift
+			if err := db.Where("user_id = ? AND date = ?", userId, s.date).First(&shift).Error; err != nil {
+				if err != gorm.ErrRecordNotFound {
+					return nil, err
+				}
+				// s.dateとlogin情報を追加
+				shift = Shift{Date: s.date, UserID: userId}
+				if result := db.Create(&shift); result.Error != nil {
+					return nil, result.Error
+				}
+			} else {
+				continue
+			}
+		}
+		addedDate = append(addedDate, s.date)
+	}
+	return addedDate, nil
+}
+
+func getUserIdFromLogin(db *gorm.DB, login string) (int, error) {
+	var user User
+	if err := db.Where("login = ?", login).First(&user).Error; err != nil {
+		return 0, err
+	}
+	return user.ID, nil
 }
