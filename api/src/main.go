@@ -56,12 +56,8 @@ type M5StickRequestData struct {
 }
 
 type Schedule struct {
-	date string
-	login []string
-}
-
-type ShiftRequestData struct {
-	Shift []Schedule `json:"shift"`
+	Date string `json:"date"`
+	Login []string `json:"login"`
 }
 
 type UserData struct {
@@ -94,7 +90,7 @@ func main() {
 	router.POST("/receive-uid", HandleUIDSubmission)
 
 	router.GET("/shift", getShiftData)
-	// router.POST("/shift", addShiftData)
+	router.POST("/shift", addShiftData)
 
 	router.POST("/activities", addActivity)
 	router.GET("/activities/cleanings", getCleanData)
@@ -128,17 +124,23 @@ func getShiftData(c *gin.Context) {
 }
 
 func addShiftData(c *gin.Context) {
-	var requestData ShiftRequestData
+	var schedule []Schedule
 
-	if err := c.BindJSON(&requestData); err != nil {
+	if err := c.BindJSON(&schedule); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if len(requestData.Shift) == 0 {
+	if len(schedule) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Shift is required"})
 		return
 	}
-	if date, err := addShiftToDB(requestData.Shift); err != nil {
+	for _, s := range schedule {
+		log.Println(s.Date)
+		for _, l := range s.Login {
+			log.Println(l)
+		}
+	}
+	if date, err := addShiftToDB(schedule); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	} else {

@@ -347,12 +347,14 @@ func addShiftToDB(schedule []Schedule) ([]string, error) {
 	}
 
 	var addedDate []string
+	var flag bool
 
 	for _, s := range schedule {
-		if s.date == "" || len(s.login)	== 0 {
+		if s.Date == "" || len(s.Login)	== 0 {
 			continue
 		}
-		for _, l := range s.login {
+		flag = false
+		for _, l := range s.Login {
 			// loginからUserIDを取得
 			userId, err := getUserIdFromLogin(db, l)
 			if err != nil {
@@ -360,20 +362,23 @@ func addShiftToDB(schedule []Schedule) ([]string, error) {
 			}
 			// s.dateとloginが一致するシフトがすでに存在した場合はスキップ
 			var shift Shift
-			if err := db.Where("user_id = ? AND date = ?", userId, s.date).First(&shift).Error; err != nil {
+			if err := db.Where("user_id = ? AND date = ?", userId, s.Date).First(&shift).Error; err != nil {
 				if err != gorm.ErrRecordNotFound {
 					return nil, err
 				}
 				// s.dateとlogin情報を追加
-				shift = Shift{Date: s.date, UserID: userId}
+				shift = Shift{Date: s.Date, UserID: userId}
 				if result := db.Create(&shift); result.Error != nil {
 					return nil, result.Error
 				}
+				flag = true
 			} else {
 				continue
 			}
 		}
-		addedDate = append(addedDate, s.date)
+		if flag {
+			addedDate = append(addedDate, s.Date)
+		}
 	}
 	return addedDate, nil
 }
