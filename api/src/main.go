@@ -71,9 +71,10 @@ type Config struct {
 }
 
 func main() {
-	_, err := initializeDB();
+	_, err := connectToDB();
 	if err != nil {
-		log.Fatal("Failed to initialize database:", err)
+		log.Println("Failed to initialize database: ", err)
+		return
 	}
 
 	router := gin.Default()

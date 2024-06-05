@@ -61,15 +61,6 @@ type Date struct {
 	Date string
 }
 
-func initializeDB() (*gorm.DB, error) {
-	db, err := connectToDB()
-	if err != nil {
-		return nil, err
-	}
-	db.AutoMigrate(&Shift{}, &User{}, &M5Stick{}, &Activity{}, &Location{}, &Role{})
-	return db, nil	
-}
-
 func connectToDB() (*gorm.DB, error) {
 	dsn, err := getDSN()
 	if err != nil {
