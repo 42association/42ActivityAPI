@@ -25,14 +25,6 @@ type RequestData struct {
 	Uid  string `json:"uid"`
 }
 
-type RoleRequestData struct {
-	Name string `json:"name"`
-}
-
-type LocationRequestData struct {
-	Name string `json:"name"`
-}
-
 type UserData struct {
 	IntraName string `json:"intra_name"`
 }
@@ -44,6 +36,7 @@ type Config struct {
 }
 
 func main() {
+	// Initialize database
 	_, err := connectToDB();
 	if err != nil {
 		log.Println("Failed to initialize database: ", err)
@@ -51,12 +44,12 @@ func main() {
 	}
 
 	router := gin.Default()
-
 	router.LoadHTMLGlob("templates/*")
 
-    config := cors.DefaultConfig()
-    config.AllowOrigins = []string{"*"}
-    router.Use(cors.New(config))
+	// CORS Settings
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"*"}
+	router.Use(cors.New(config))
 
 	router.GET("/", ShowIndexPage)
 	router.GET("/new", RedirectToIndexWithUID)
@@ -232,48 +225,4 @@ func fetchUserData(accessToken string) (*UserData, error) {
 	}
 
 	return &UserData{IntraName: intraName}, nil
-}
-
-func addRole(c *gin.Context) {
-	var requestData RoleRequestData
-
-	// JSONリクエストボディを解析してrequestDataに格納
-	if err := c.BindJSON(&requestData); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	if requestData.Name == "" {
-		// Roleが必須
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Role is required"})
-		return
-	}
-	// データベースにRoleを追加
-	if err := addRoleToDB(requestData.Name); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"name": requestData.Name})
-	return
-}
-
-func addLocation(c *gin.Context) {
-	var requestData LocationRequestData
-
-	// JSONリクエストボディを解析してrequestDataに格納
-	if err := c.BindJSON(&requestData); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	if requestData.Name == "" {
-		// Locationが必須
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Location is required"})
-		return
-	}
-	// データベースにLocationを追加
-	if err := addLocationToDB(requestData.Name); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"name": requestData.Name})
-	return
 }
