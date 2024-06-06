@@ -7,8 +7,8 @@ import (
 	"os"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/cors"
-	"github.com/42association/42ActivityAPI/internal/handlers/handler"
-	"github.com/42association/42ActivityAPI/internal/accessdb/accessdb"
+	"42ActivityAPI/internal/handlers"
+	"42ActivityAPI/internal/accessdb"
 )
 
 type Config struct {
@@ -26,7 +26,7 @@ func main() {
 	}
 
 	router := gin.Default()
-	router.LoadHTMLGlob("templates/*")
+	router.LoadHTMLGlob("../../web/templates/*")
 
 	// CORS Settings
 	config := cors.DefaultConfig()

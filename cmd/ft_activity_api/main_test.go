@@ -10,8 +10,8 @@ import (
 	"net/http/httptest"
 	"net/http"
 	"os"
-	"github.com/42association/42ActivityAPI/internal/handlers/handler"
-	"github.com/42association/42ActivityAPI/internal/accessdb/accessdb"
+	"42ActivityAPI/internal/handlers"
+	"42ActivityAPI/internal/accessdb"
 )
 
 func setupTestDB() *gorm.DB {

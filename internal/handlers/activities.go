@@ -1,4 +1,4 @@
-package handler
+package handlers
 
 import (
 	"github.com/gin-gonic/gin"
@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"github.com/jinzhu/now"
 	"errors"
-	"github.com/42association/42ActivityAPI/internal/accessdb/accessdb"
+	"42ActivityAPI/internal/accessdb"
 )
 
 type ActivityRequestData struct {

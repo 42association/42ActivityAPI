@@ -1,4 +1,4 @@
-package handler
+package handlers
 
 import (
 	"github.com/gin-gonic/gin"
@@ -6,7 +6,7 @@ import (
 	"time"
 	"regexp"
 	"errors"
-	"github.com/42association/42ActivityAPI/internal/accessdb/accessdb"
+	"42ActivityAPI/internal/accessdb"
 )
 
 type Schedule struct {
