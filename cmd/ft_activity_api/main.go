@@ -11,12 +11,6 @@ import (
 	"42ActivityAPI/internal/accessdb"
 )
 
-type Config struct {
-	UID         string
-	Secret      string
-	CallbackURL string
-}
-
 func main() {
 	// Initialize database
 	_, err := ConnectToDB();
@@ -54,19 +48,6 @@ func main() {
 	router.PUT("/users", EditUser)
 
 	router.Run(":" + os.Getenv("PORT"))
-}
-
-// Loading environment variables
-func LoadConfig() (*Config, error) {
-	config := &Config{
-		UID:         os.Getenv("UID"),
-		Secret:      os.Getenv("SECRET"),
-		CallbackURL: os.Getenv("CALLBACK_URL"),
-	}
-	if config.UID == "" || config.Secret == "" || config.CallbackURL == "" {
-		return nil, errors.New("one or more required environment variables are not set")
-	}
-	return config, nil
 }
 
 func ShowIndexPage(c *gin.Context) {

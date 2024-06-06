@@ -26,7 +26,7 @@ func AddM5Stick(c *gin.Context) {
 		return
 	}
 	// データベースにM5Stickを追加
-	if err := AddM5StickToDB(requestData.Mac, requestData.RoleName, requestData.LocationName); err != nil {
+	if err := accessdb.AddM5StickToDB(requestData.Mac, requestData.RoleName, requestData.LocationName); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

@@ -9,6 +9,7 @@ import (
 	"io"
 	"errors"
 	"42ActivityAPI/internal/accessdb"
+	"42ActivityAPI/pkg/loadconfig"
 )
 
 type TokenProperty struct {
@@ -49,13 +50,13 @@ func HandleUIDSubmission(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get user infomation"})
 		return
 	}
-	if UserExists(intraName) {
-		if AddUidToExistUser(intraName, requestData.Uid) == false {
+	if accessdb.UserExists(intraName) {
+		if accessdb.AddUidToExistUser(intraName, requestData.Uid) == false {
 			c.JSON(http.StatusConflict, gin.H{"error": "User with this login is already associated with a uid"})
 			return
 		}
 	} else {
-		if err := AddUserToDB(requestData.Uid, intraName, ""); err != nil {
+		if err := accessdb.AddUserToDB(requestData.Uid, intraName, ""); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
@@ -72,7 +73,7 @@ func HandleUIDSubmission(c *gin.Context) {
 
 // Receive the code and return the access token.
 func exchangeCodeForToken(code string) *TokenProperty {
-	config, err := LoadConfig()
+	config, err := loadconfig.LoadConfig()
 	if err != nil {
 		log.Println("Error: Failed to load configuration: ", err)
 		return nil

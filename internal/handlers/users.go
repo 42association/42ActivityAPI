@@ -25,12 +25,12 @@ func AddUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Login is required"})
 		return
 	}
-	if UserExists(requestData.Login) {
+	if accessdb.UserExists(requestData.Login) {
 		c.JSON(http.StatusConflict, gin.H{"error": "User with this login already exists"})
 		return
 	}
 	// データベースにUserを追加
-	if err := AddUserToDB(requestData.Uid, requestData.Login, requestData.Wallet); err != nil {
+	if err := accessdb.AddUserToDB(requestData.Uid, requestData.Login, requestData.Wallet); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -62,7 +62,7 @@ func EditUser(c *gin.Context) {
 		return
 	}
 	// DB上のUserを編集
-	if err := EditUserInDB(requestData.Uid, requestData.Login, requestData.Wallet); err != nil {
+	if err := accessdb.EditUserInDB(requestData.Uid, requestData.Login, requestData.Wallet); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

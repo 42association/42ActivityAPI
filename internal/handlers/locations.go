@@ -24,7 +24,7 @@ func AddLocation(c *gin.Context) {
 		return
 	}
 	// データベースにLocationを追加
-	if err := AddLocationToDB(requestData.Name); err != nil {
+	if err := accessdb.AddLocationToDB(requestData.Name); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

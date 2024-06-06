@@ -24,7 +24,7 @@ func AddRole(c *gin.Context) {
 		return
 	}
 	// データベースにRoleを追加
-	if err := AddRoleToDB(requestData.Name); err != nil {
+	if err := accessdb.AddRoleToDB(requestData.Name); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

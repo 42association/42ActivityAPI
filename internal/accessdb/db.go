@@ -61,6 +61,11 @@ type Date struct {
 	Date string
 }
 
+type Schedule struct {
+	Date string `json:"date"`
+	Login []string `json:"login"`
+}
+
 func ConnectToDB() (*gorm.DB, error) {
 	dsn, err := getDSN()
 	if err != nil {

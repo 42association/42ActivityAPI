@@ -9,11 +9,6 @@ import (
 	"42ActivityAPI/internal/accessdb"
 )
 
-type Schedule struct {
-	Date string `json:"date"`
-	Login []string `json:"login"`
-}
-
 func GetShiftData(c *gin.Context) {
 	date, err := getQueryAboutDate(c)
 	if err != nil {
@@ -22,7 +17,7 @@ func GetShiftData(c *gin.Context) {
 	}
 
 	//roleがcleaningのactivityを取得
-	shifts, err := GetShiftFromDB(date)
+	shifts, err := accessdb.GetShiftFromDB(date)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get shift"})
 		return
@@ -31,7 +26,7 @@ func GetShiftData(c *gin.Context) {
 }
 
 func AddShiftData(c *gin.Context) {
-	var schedule []Schedule
+	var schedule []accessdb.Schedule
 
 	if err := c.BindJSON(&schedule); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -41,7 +36,7 @@ func AddShiftData(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Shift is required"})
 		return
 	}
-	if date, err := AddShiftToDB(schedule); err != nil {
+	if date, err := accessdb.AddShiftToDB(schedule); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	} else {

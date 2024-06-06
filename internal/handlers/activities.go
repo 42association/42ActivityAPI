@@ -25,7 +25,7 @@ func GetActivityCleanData(c *gin.Context) {
 	}
 
 	//roleがcleaningのactivityを取得
-	Activities, err := GetActivitiesFromDB(start_time, end_time, "cleaning")
+	Activities, err := accessdb.GetActivitiesFromDB(start_time, end_time, "cleaning")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get activities"})
 		return
@@ -46,7 +46,7 @@ func AddActivity(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "All parameters are required"})
 		return
 	}
-	db, err := ConnectToDB()
+	db, err := accessdb.ConnectToDB()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		log.Fatal("Failed to initialize database:", err)
