@@ -22,7 +22,7 @@ func setupTestDB() *gorm.DB {
 	if err != nil {
 		panic("failed to connect database")
 	}
-	db.AutoMigrate(&Shift{}, &User{}, &M5Stick{}, &Activity{}, &Location{}, &Role{})
+	db.AutoMigrate(&accessdb.Shift{}, &accessdb.User{}, &accessdb.M5Stick{}, &accessdb.Activity{}, &accessdb.Location{}, &accessdb.Role{})
 	return db
 }
 
@@ -136,16 +136,16 @@ func testConnectToDB() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	db.AutoMigrate(&Shift{}, &User{}, &M5Stick{}, &Activity{}, &Location{}, &Role{})
+	db.AutoMigrate(&accessdb.Shift{}, &accessdb.User{}, &accessdb.M5Stick{}, &accessdb.Activity{}, &accessdb.Location{}, &accessdb.Role{})
 	return db, nil	
 }
 
-func testGetShiftFromDB(date string) ([]Shift, error) {
+func testGetShiftFromDB(date string) ([]accessdb.Shift, error) {
 	db, err := testConnectToDB()
 	if err != nil {
 		return nil, err
 	}
-	var shifts []Shift
+	var shifts []accessdb.Shift
     if err := db.Preload("User").Where("date = ?", date).Find(&shifts).Error; err != nil {
         return nil, err
     }
@@ -181,42 +181,42 @@ func TestAddDuplicated(t *testing.T) {
 
 func Seed(db *gorm.DB) error {
 	// Create a new user
-	users := []User{{UID: "foo", Login: "kakiba", Wallet:"0xA0D9F5854A77D4906906BCEDAAEBB3A39D61165A"}, {UID: "bar", Login: "tanemura", Wallet:"42156DF83404D7833BE3DBDB5D1B367964FDF037"}}
+	users := []accessdb.User{{UID: "foo", Login: "kakiba", Wallet:"0xA0D9F5854A77D4906906BCEDAAEBB3A39D61165A"}, {UID: "bar", Login: "tanemura", Wallet:"42156DF83404D7833BE3DBDB5D1B367964FDF037"}}
 	for _, user := range users {
 		if result := db.Create(&user); result.Error != nil {
 			return result.Error
 		}
 	}
 
-	shifts := []Shift{{Date: "2024-06-01", UserID: 1}, {Date: "2024-06-02", UserID: 2}}
+	shifts := []accessdb.Shift{{Date: "2024-06-01", UserID: 1}, {Date: "2024-06-02", UserID: 2}}
 	for _, shift := range shifts {
 		if result := db.Create(&shift); result.Error != nil {
 			return result.Error
 		}
 	}
 
-	locations := []Location{{Name: "F1"}, {Name: "F2"}}
+	locations := []accessdb.Location{{Name: "F1"}, {Name: "F2"}}
 	for _, location := range locations {
 		if result := db.Create(&location); result.Error != nil {
 			return result.Error
 		}
 	}
 
-	roles := []Role{{Name: "Cleaning"}, {Name: "UsingShower"}}
+	roles := []accessdb.Role{{Name: "Cleaning"}, {Name: "UsingShower"}}
 	for _, role := range roles {
 		if result := db.Create(&role); result.Error != nil {
 			return result.Error
 		}
 	}
 
-	m5Sticks := []M5Stick{{Mac: "00:00:00:00:00:00", RoleId: 1, LocationId: 1}, {Mac: "11:11:11:11:11:11", RoleId: 2, LocationId: 2}}
+	m5Sticks := []accessdb.M5Stick{{Mac: "00:00:00:00:00:00", RoleId: 1, LocationId: 1}, {Mac: "11:11:11:11:11:11", RoleId: 2, LocationId: 2}}
 	for _, m5Stick := range m5Sticks {
 		if result := db.Create(&m5Stick); result.Error != nil {
 			return result.Error
 		}
 	}
 
-	activities := []Activity{
+	activities := []accessdb.Activity{
 		{UserID: 1, M5StickID: 1, CreatedAt: time.Now().Unix()},
 		{UserID: 2, M5StickID: 2, CreatedAt: time.Now().Unix()},
 	}
