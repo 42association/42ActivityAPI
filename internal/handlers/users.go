@@ -12,16 +12,15 @@ type UserRequestData struct {
 	Wallet string `json:"wallet"`
 }
 
+// Handle the endpoint to add a user.
 func AddUser(c *gin.Context) {
 	var requestData UserRequestData
 
-	// JSONリクエストボディを解析してrequestDataに格納
 	if err := c.BindJSON(&requestData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	if requestData.Login == "" {
-		// Loginは必須
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Login is required"})
 		return
 	}
@@ -29,7 +28,6 @@ func AddUser(c *gin.Context) {
 		c.JSON(http.StatusConflict, gin.H{"error": "User with this login already exists"})
 		return
 	}
-	// データベースにUserを追加
 	if err := accessdb.AddUserToDB(requestData.Uid, requestData.Login, requestData.Wallet); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -48,20 +46,18 @@ func AddUser(c *gin.Context) {
 	return
 }
 
+// Handle the endpoint that updates the user.
 func EditUser(c *gin.Context) {
 	var requestData UserRequestData
 
-	// JSONリクエストボディを解析してrequestDataに格納
 	if err := c.BindJSON(&requestData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	if requestData.Login == "" {
-		// Loginは必須
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Login is required"})
 		return
 	}
-	// DB上のUserを編集
 	if err := accessdb.EditUserInDB(requestData.Uid, requestData.Login, requestData.Wallet); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

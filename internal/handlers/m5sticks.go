@@ -12,20 +12,18 @@ type M5StickRequestData struct {
 	LocationName string `json:"location"`
 }
 
+// Handles the endpoint to add the M5stick.
 func AddM5Stick(c *gin.Context) {
 	var requestData M5StickRequestData
 
-	// JSONリクエストボディを解析してrequestDataに格納
 	if err := c.BindJSON(&requestData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	if requestData.Mac == "" || requestData.RoleName == "" || requestData.LocationName == "" {
-		// すべてのパラメータが必須
 		c.JSON(http.StatusBadRequest, gin.H{"error": "All parameters are required"})
 		return
 	}
-	// データベースにM5Stickを追加
 	if err := accessdb.AddM5StickToDB(requestData.Mac, requestData.RoleName, requestData.LocationName); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

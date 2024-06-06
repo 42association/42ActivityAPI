@@ -9,6 +9,7 @@ import (
 	"42ActivityAPI/internal/accessdb"
 )
 
+// Handle the endpoint that gets the shift.
 func GetShiftData(c *gin.Context) {
 	date, err := getQueryAboutDate(c)
 	if err != nil {
@@ -16,7 +17,6 @@ func GetShiftData(c *gin.Context) {
 		return
 	}
 
-	//roleがcleaningのactivityを取得
 	shifts, err := accessdb.GetShiftFromDB(date)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get shift"})
@@ -25,6 +25,7 @@ func GetShiftData(c *gin.Context) {
 	c.JSON(http.StatusOK, shifts)
 }
 
+// Handle the endpoint that adds a shift.
 func AddShiftData(c *gin.Context) {
 	var schedule []accessdb.Schedule
 
@@ -44,6 +45,7 @@ func AddShiftData(c *gin.Context) {
 	}
 }
 
+// Convert a query with a time format like "2006-01-02" to unix seconds.
 func getQueryAboutDate(c *gin.Context) (string, error) {
 	date := c.Query("date")
 	if date == "" {
