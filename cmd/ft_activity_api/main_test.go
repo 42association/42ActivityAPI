@@ -27,7 +27,7 @@ func setupTestDB() *gorm.DB {
 
 func TestMain(m *testing.M) {
 	db := setupTestDB()
-	seed(db)
+	Seed(db)
 	code := m.Run()
 	os.Exit(code)
 }

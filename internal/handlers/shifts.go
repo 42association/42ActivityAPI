@@ -14,7 +14,7 @@ type Schedule struct {
 	Login []string `json:"login"`
 }
 
-func getShiftData(c *gin.Context) {
+func GetShiftData(c *gin.Context) {
 	date, err := getQueryAboutDate(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid query"})
@@ -22,7 +22,7 @@ func getShiftData(c *gin.Context) {
 	}
 
 	//roleがcleaningのactivityを取得
-	shifts, err := getShiftFromDB(date)
+	shifts, err := GetShiftFromDB(date)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get shift"})
 		return
@@ -30,7 +30,7 @@ func getShiftData(c *gin.Context) {
 	c.JSON(http.StatusOK, shifts)
 }
 
-func addShiftData(c *gin.Context) {
+func AddShiftData(c *gin.Context) {
 	var schedule []Schedule
 
 	if err := c.BindJSON(&schedule); err != nil {
@@ -41,7 +41,7 @@ func addShiftData(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Shift is required"})
 		return
 	}
-	if date, err := addShiftToDB(schedule); err != nil {
+	if date, err := AddShiftToDB(schedule); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	} else {

@@ -16,7 +16,7 @@ type ActivityRequestData struct {
 	Uid string `json:"uid"`
 }
 
-func getActivityCleanData(c *gin.Context) {
+func GetActivityCleanData(c *gin.Context) {
 	//start_timeとend_timeを取得
 	start_time, end_time, err := getQueryAboutTime(c)
 	if err != nil {
@@ -25,7 +25,7 @@ func getActivityCleanData(c *gin.Context) {
 	}
 
 	//roleがcleaningのactivityを取得
-	Activities, err := getActivitiesFromDB(start_time, end_time, "cleaning")
+	Activities, err := GetActivitiesFromDB(start_time, end_time, "cleaning")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get activities"})
 		return
@@ -33,7 +33,7 @@ func getActivityCleanData(c *gin.Context) {
 	c.JSON(http.StatusOK, Activities)
 }
 
-func addActivity(c *gin.Context) {
+func AddActivity(c *gin.Context) {
 	var requestData ActivityRequestData
 	
 	// JSONリクエストボディを解析してrequestDataに格納
@@ -46,7 +46,7 @@ func addActivity(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "All parameters are required"})
 		return
 	}
-	db, err := connectToDB()
+	db, err := ConnectToDB()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		log.Fatal("Failed to initialize database:", err)

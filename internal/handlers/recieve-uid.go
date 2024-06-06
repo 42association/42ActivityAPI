@@ -49,13 +49,13 @@ func HandleUIDSubmission(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get user infomation"})
 		return
 	}
-	if userExists(intraName) {
-		if addUidToExistUser(intraName, requestData.Uid) == false {
+	if UserExists(intraName) {
+		if AddUidToExistUser(intraName, requestData.Uid) == false {
 			c.JSON(http.StatusConflict, gin.H{"error": "User with this login is already associated with a uid"})
 			return
 		}
 	} else {
-		if err := addUserToDB(requestData.Uid, intraName, ""); err != nil {
+		if err := AddUserToDB(requestData.Uid, intraName, ""); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}

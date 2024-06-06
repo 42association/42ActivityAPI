@@ -61,7 +61,7 @@ type Date struct {
 	Date string
 }
 
-func connectToDB() (*gorm.DB, error) {
+func ConnectToDB() (*gorm.DB, error) {
 	dsn, err := getDSN()
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func getDSN() (string, error) {
 	return dsn, nil
 }
 
-func seed(db *gorm.DB) error {
+func Seed(db *gorm.DB) error {
 	// Create a new user
 	users := []User{{UID: "foo", Login: "kakiba", Wallet:"0xA0D9F5854A77D4906906BCEDAAEBB3A39D61165A"}, {UID: "bar", Login: "tanemura", Wallet:"42156DF83404D7833BE3DBDB5D1B367964FDF037"}}
 	for _, user := range users {
@@ -132,8 +132,8 @@ func seed(db *gorm.DB) error {
 	return nil
 }
 
-func getShiftFromDB(date string) ([]Shift, error) {
-	db, err := connectToDB()
+func GetShiftFromDB(date string) ([]Shift, error) {
+	db, err := ConnectToDB()
 	if err != nil {
 		return nil, err
 	}
@@ -144,8 +144,8 @@ func getShiftFromDB(date string) ([]Shift, error) {
 	return shifts, nil
 }
 
-func getActivitiesFromDB(start_time int64, end_time int64, role string) ([]Activity, error) {
-	db, err := connectToDB()
+func GetActivitiesFromDB(start_time int64, end_time int64, role string) ([]Activity, error) {
+	db, err := ConnectToDB()
 	if err != nil {
 		return nil, err
 	}
@@ -162,8 +162,8 @@ func getActivitiesFromDB(start_time int64, end_time int64, role string) ([]Activ
 	return activities, nil
 }
 
-func addRoleToDB(roleName string) error {
-	db, err := connectToDB()
+func AddRoleToDB(roleName string) error {
+	db, err := ConnectToDB()
 	if err != nil {
 		return err
 	}
@@ -186,8 +186,8 @@ func addRoleToDB(roleName string) error {
 	return nil
 }
 
-func addLocationToDB(locationName string) error {
-	db, err := connectToDB()
+func AddLocationToDB(locationName string) error {
+	db, err := ConnectToDB()
 	if err != nil {
 		return err
 	}
@@ -210,8 +210,8 @@ func addLocationToDB(locationName string) error {
 	return nil
 }
 
-func addM5StickToDB(mac string, roleName string, locationName string) error {
-	db, err := connectToDB()
+func AddM5StickToDB(mac string, roleName string, locationName string) error {
+	db, err := ConnectToDB()
 	if err != nil {
 		return err
 	}
@@ -248,8 +248,8 @@ func addM5StickToDB(mac string, roleName string, locationName string) error {
 	return nil
 }
 
-func addUserToDB(uid string, login string, wallet string) error {
-	db, err := connectToDB()
+func AddUserToDB(uid string, login string, wallet string) error {
+	db, err := ConnectToDB()
 	if err != nil {
 		return err
 	}
@@ -273,8 +273,8 @@ func addUserToDB(uid string, login string, wallet string) error {
 }
 
 //loginがすでに存在する場合uidとwalletを更新
-func editUserInDB(uid string, login string, wallet string) error {
-	db, err := connectToDB()
+func EditUserInDB(uid string, login string, wallet string) error {
+	db, err := ConnectToDB()
 	if err != nil {
 		return err
 	}
@@ -292,8 +292,8 @@ func editUserInDB(uid string, login string, wallet string) error {
 	return nil
 }
 
-func userExists(login string) bool {
-	db, err := connectToDB()
+func UserExists(login string) bool {
+	db, err := ConnectToDB()
 	if err != nil {
 		panic("database error")
 	}
@@ -309,8 +309,8 @@ func userExists(login string) bool {
 	return true
 }
 
-func addUidToExistUser(login string, uid string) bool {
-	db, err := connectToDB()
+func AddUidToExistUser(login string, uid string) bool {
+	db, err := ConnectToDB()
 	if err != nil {
 		panic("database error")
 	}
@@ -331,8 +331,8 @@ func addUidToExistUser(login string, uid string) bool {
 	return true
 }
 
-func addShiftToDB(schedule []Schedule) ([]string, error) {
-	db, err := connectToDB()
+func AddShiftToDB(schedule []Schedule) ([]string, error) {
+	db, err := ConnectToDB()
 	if err != nil {
 		panic("database error")
 	}

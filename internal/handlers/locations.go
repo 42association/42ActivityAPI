@@ -10,7 +10,7 @@ type LocationRequestData struct {
 	Name string `json:"name"`
 }
 
-func addLocation(c *gin.Context) {
+func AddLocation(c *gin.Context) {
 	var requestData LocationRequestData
 
 	// JSONリクエストボディを解析してrequestDataに格納
@@ -24,7 +24,7 @@ func addLocation(c *gin.Context) {
 		return
 	}
 	// データベースにLocationを追加
-	if err := addLocationToDB(requestData.Name); err != nil {
+	if err := AddLocationToDB(requestData.Name); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

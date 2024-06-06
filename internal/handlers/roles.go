@@ -10,7 +10,7 @@ type RoleRequestData struct {
 	Name string `json:"name"`
 }
 
-func addRole(c *gin.Context) {
+func AddRole(c *gin.Context) {
 	var requestData RoleRequestData
 
 	// JSONリクエストボディを解析してrequestDataに格納
@@ -24,7 +24,7 @@ func addRole(c *gin.Context) {
 		return
 	}
 	// データベースにRoleを追加
-	if err := addRoleToDB(requestData.Name); err != nil {
+	if err := AddRoleToDB(requestData.Name); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

@@ -12,7 +12,7 @@ type UserRequestData struct {
 	Wallet string `json:"wallet"`
 }
 
-func addUser(c *gin.Context) {
+func AddUser(c *gin.Context) {
 	var requestData UserRequestData
 
 	// JSONリクエストボディを解析してrequestDataに格納
@@ -25,12 +25,12 @@ func addUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Login is required"})
 		return
 	}
-	if userExists(requestData.Login) {
+	if UserExists(requestData.Login) {
 		c.JSON(http.StatusConflict, gin.H{"error": "User with this login already exists"})
 		return
 	}
 	// データベースにUserを追加
-	if err := addUserToDB(requestData.Uid, requestData.Login, requestData.Wallet); err != nil {
+	if err := AddUserToDB(requestData.Uid, requestData.Login, requestData.Wallet); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -48,7 +48,7 @@ func addUser(c *gin.Context) {
 	return
 }
 
-func editUser(c *gin.Context) {
+func EditUser(c *gin.Context) {
 	var requestData UserRequestData
 
 	// JSONリクエストボディを解析してrequestDataに格納
@@ -62,7 +62,7 @@ func editUser(c *gin.Context) {
 		return
 	}
 	// DB上のUserを編集
-	if err := editUserInDB(requestData.Uid, requestData.Login, requestData.Wallet); err != nil {
+	if err := EditUserInDB(requestData.Uid, requestData.Login, requestData.Wallet); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

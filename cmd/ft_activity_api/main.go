@@ -19,7 +19,7 @@ type Config struct {
 
 func main() {
 	// Initialize database
-	_, err := connectToDB();
+	_, err := ConnectToDB();
 	if err != nil {
 		log.Println("Failed to initialize database: ", err)
 		return
@@ -38,20 +38,20 @@ func main() {
 	router.GET("/callback", ShowCallbackPage)
 	router.POST("/receive-uid", HandleUIDSubmission)
 
-	router.GET("/shift", getShiftData)
-	router.POST("/shift", addShiftData)
+	router.GET("/shift", GetShiftData)
+	router.POST("/shift", AddShiftData)
 
-	router.POST("/activities", addActivity)
-	router.GET("/activities/cleanings", getActivityCleanData)
+	router.POST("/activities", AddActivity)
+	router.GET("/activities/cleanings", GetActivityCleanData)
 
-	router.POST("/roles", addRole)
+	router.POST("/roles", AddRole)
 
-	router.POST("/locations", addLocation)
+	router.POST("/locations", AddLocation)
 
-	router.POST("/m5sticks", addM5Stick)
+	router.POST("/m5sticks", AddM5Stick)
 
-	router.POST("/users", addUser)
-	router.PUT("/users", editUser)
+	router.POST("/users", AddUser)
+	router.PUT("/users", EditUser)
 
 	router.Run(":" + os.Getenv("PORT"))
 }
