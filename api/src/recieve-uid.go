@@ -73,7 +73,7 @@ func HandleUIDSubmission(c *gin.Context) {
 func exchangeCodeForToken(code string) *TokenProperty {
 	config, err := LoadConfig()
 	if err != nil {
-		log.Println("Failed to load configuration: ", err)
+		log.Println("Error: Failed to load configuration: ", err)
 		return nil
 	}
 
@@ -89,20 +89,20 @@ func exchangeCodeForToken(code string) *TokenProperty {
 
 	resp, err := http.PostForm(endPointURL, query)
 	if err != nil {
-		log.Println("Error exchanging code for token: ", err)
+		log.Println("Error: Failed to POST request: ", err)
 		return nil
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		log.Printf("Error exchanging code for token: %s\n", resp.Status)
+		log.Printf("Error: HTTP status is not 200 OK: %s\n", resp.Status)
 		return nil
 	}
 
 	var tokenProperty TokenProperty
 	err = json.NewDecoder(resp.Body).Decode(&tokenProperty)
 	if err != nil {
-		log.Printf("Error decoding token: %v\n", err)
+		log.Printf("Error: Failed to decode token properties: %v\n", err)
 		return nil
 	}
 
@@ -120,33 +120,33 @@ func fetchUserData(accessToken string) (string, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println("Error fetching user data: ", err)
+		log.Println("Error: Failed to GET request: ", err)
 		return "", err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		log.Printf("Error fetching user data: %s\n", resp.Status)
-		return "", errors.New("Failed to fetch user data.")
+		log.Printf("Error: HTTP status is not 200 OK: %s\n", resp.Status)
+		return "", errors.New("HTTP status is not 200 OK")
 	}
 
 	userData, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Printf("Error reading user data: %v\n", err)
+		log.Printf("Error: Failed to read the response body: %v\n", err)
 		return "", err
 	}
 
 	var userJSON map[string]interface{}
 	err = json.Unmarshal(userData, &userJSON)
 	if err != nil {
-		log.Printf("Error parsing user data: %v\n", err)
+		log.Printf("Error: Failed to convert to struct: %v\n", err)
 		return "", err
 	}
 
 	intraName, ok := userJSON["login"].(string)
 	if !ok {
-		log.Println("Login field not found or not a string")
-		return "", errors.New("Failed to get user data.")
+		log.Println("Error: Login field does not exist or is not a string")
+		return "", errors.New("Login field does not exist or is not a string")
 	}
 
 	return intraName, nil
