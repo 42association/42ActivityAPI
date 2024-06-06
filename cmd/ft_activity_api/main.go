@@ -27,9 +27,10 @@ func main() {
 	config.AllowOrigins = []string{"*"}
 	router.Use(cors.New(config))
 
-	router.GET("/", ShowIndexPage)
-	router.GET("/new", RedirectToIndexWithUID)
-	router.GET("/callback", ShowCallbackPage)
+	router.GET("/", showIndexPage)
+	router.GET("/new", redirectToIndexWithUID)
+	router.GET("/callback", showCallbackPage)
+
 	router.POST("/receive-uid", handlers.HandleUIDSubmission)
 
 	router.GET("/shift", handlers.GetShiftData)
@@ -50,7 +51,7 @@ func main() {
 	router.Run(":" + os.Getenv("PORT"))
 }
 
-func ShowIndexPage(c *gin.Context) {
+func showIndexPage(c *gin.Context) {
 	config, err := loadconfig.LoadConfig()
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v\n", err)
@@ -62,11 +63,11 @@ func ShowIndexPage(c *gin.Context) {
 	})
 }
 
-func RedirectToIndexWithUID(c *gin.Context) {
+func redirectToIndexWithUID(c *gin.Context) {
 	uid := c.Query("uid")
 	c.Redirect(http.StatusMovedPermanently, "/?uid="+uid)
 }
 
-func ShowCallbackPage(c *gin.Context) {
+func showCallbackPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "callback.html", nil)
 }
