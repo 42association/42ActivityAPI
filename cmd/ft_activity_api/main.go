@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -9,18 +8,19 @@ import (
 	"github.com/gin-contrib/cors"
 	"42ActivityAPI/internal/handlers"
 	"42ActivityAPI/internal/accessdb"
+	"42ActivityAPI/internal/loadconfig"
 )
 
 func main() {
 	// Initialize database
-	_, err := ConnectToDB();
+	_, err := accessdb.ConnectToDB();
 	if err != nil {
 		log.Println("Failed to initialize database: ", err)
 		return
 	}
 
 	router := gin.Default()
-	router.LoadHTMLGlob("../../web/templates/*")
+	router.LoadHTMLGlob("web/templates/*")
 
 	// CORS Settings
 	config := cors.DefaultConfig()
@@ -30,28 +30,28 @@ func main() {
 	router.GET("/", ShowIndexPage)
 	router.GET("/new", RedirectToIndexWithUID)
 	router.GET("/callback", ShowCallbackPage)
-	router.POST("/receive-uid", HandleUIDSubmission)
+	router.POST("/receive-uid", handlers.HandleUIDSubmission)
 
-	router.GET("/shift", GetShiftData)
-	router.POST("/shift", AddShiftData)
+	router.GET("/shift", handlers.GetShiftData)
+	router.POST("/shift", handlers.AddShiftData)
 
-	router.POST("/activities", AddActivity)
-	router.GET("/activities/cleanings", GetActivityCleanData)
+	router.POST("/activities", handlers.AddActivity)
+	router.GET("/activities/cleanings", handlers.GetActivityCleanData)
 
-	router.POST("/roles", AddRole)
+	router.POST("/roles", handlers.AddRole)
 
-	router.POST("/locations", AddLocation)
+	router.POST("/locations", handlers.AddLocation)
 
-	router.POST("/m5sticks", AddM5Stick)
+	router.POST("/m5sticks", handlers.AddM5Stick)
 
-	router.POST("/users", AddUser)
-	router.PUT("/users", EditUser)
+	router.POST("/users", handlers.AddUser)
+	router.PUT("/users", handlers.EditUser)
 
 	router.Run(":" + os.Getenv("PORT"))
 }
 
 func ShowIndexPage(c *gin.Context) {
-	config, err := LoadConfig()
+	config, err := loadconfig.LoadConfig()
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v\n", err)
 	}

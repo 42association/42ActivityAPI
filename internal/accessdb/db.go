@@ -8,6 +8,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"errors"
+	"net/http"
 )
 
 type Shift struct {
@@ -385,4 +386,37 @@ func getUserIdFromLogin(db *gorm.DB, login string) (int, error) {
 		return 0, err
 	}
 	return user.ID, nil
+}
+
+func AddActivityToDB(uid string, mac string) (int, string, string, error) {
+	db, err := ConnectToDB()
+	if err != nil {
+		return http.StatusInternalServerError, "", "", err
+	}
+
+	var user User
+	if err := db.Where("uid = ?", uid).First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return http.StatusNotFound, "", "", err
+		} else {
+			return http.StatusInternalServerError, "", "", err
+		}
+	}
+
+	var m5Stick M5Stick
+	if err := db.Where("mac = ?", mac).First(&m5Stick).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return http.StatusNotFound, "", "", err
+		} else {
+			return http.StatusInternalServerError, "", "", err
+		}
+	}
+
+	activity := Activity{UserID: user.ID, M5StickID: m5Stick.ID, CreatedAt: time.Now().Unix()}
+
+	// データベースにActivityを追加
+	if result := db.Create(&activity); result.Error != nil {
+		return http.StatusBadRequest, "", "", result.Error
+	}
+	return http.StatusOK, uid, mac, nil
 }

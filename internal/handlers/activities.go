@@ -2,9 +2,7 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
-	"log"
 	"strconv"
 	"github.com/jinzhu/now"
 	"errors"
@@ -35,55 +33,24 @@ func GetActivityCleanData(c *gin.Context) {
 
 func AddActivity(c *gin.Context) {
 	var requestData ActivityRequestData
-	
-	// JSONリクエストボディを解析してrequestDataに格納
+
 	if err := c.BindJSON(&requestData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	// requestDataが空でないことを確認（MacとUidが非空の文字列）
+
 	if requestData.Mac == "" || requestData.Uid == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "All parameters are required"})
 		return
 	}
-	db, err := accessdb.ConnectToDB()
+
+	status, uid, mac, err := accessdb.AddActivityToDB(requestData.Uid, requestData.Mac)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		log.Fatal("Failed to initialize database:", err)
+		c.JSON(status, gin.H{"error": err.Error()})
 		return
 	}
-	user := User{}
-	if err := db.Where("uid = ?", requestData.Uid).First(&user).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			log.Println("User not found:", err)
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		} else {
-			log.Println("Failed to get user:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user"})
-		}
-		return
-	}
-	m5Stick := M5Stick{}
-	if err := db.Where("mac = ?", requestData.Mac).First(&m5Stick).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			log.Println("M5Stick not found:", err)
-			c.JSON(http.StatusNotFound, gin.H{"error": "M5Stick not found"})
-		} else {
-			log.Println("Failed to get M5Stick:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get M5Stick"})
-		}
-		return
-	}
-	// Add a new activity
-	activity := Activity{UserID: user.ID, M5StickID: m5Stick.ID}
-	if result := db.Create(&activity); result.Error != nil {
-		log.Fatal("Failed to create activity:", result.Error)
-		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
-		return
-	}
-	// 取得したuserDataを含めてレスポンスを返す
-	c.JSON(http.StatusOK, gin.H{
-		"uid": requestData.Uid, "mac": requestData.Mac})
+
+	c.JSON(status, gin.H{"uid": uid, "mac": mac})
 	return
 }
 

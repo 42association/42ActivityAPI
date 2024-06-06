@@ -9,7 +9,7 @@ import (
 	"io"
 	"errors"
 	"42ActivityAPI/internal/accessdb"
-	"42ActivityAPI/pkg/loadconfig"
+	"42ActivityAPI/internal/loadconfig"
 )
 
 type TokenProperty struct {
