@@ -51,7 +51,7 @@ func HandleUIDSubmission(c *gin.Context) {
 		return
 	}
 	if accessdb.UserExists(intraName) {
-		if accessdb.AddUidToExistUser(intraName, requestData.Uid) == false {
+		if err := accessdb.AddUidToExistUser(intraName, requestData.Uid); err != nil {
 			c.JSON(http.StatusConflict, gin.H{"error": "User with this login is already associated with a uid"})
 			return
 		}

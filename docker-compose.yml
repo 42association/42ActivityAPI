@@ -8,8 +8,6 @@ services:
     volumes:
       - ./:/code
     working_dir: /code
-    env_file:
-      - ./configs/.env
     ports:
       - "${API_PORT}:${API_PORT}"
     networks:
@@ -28,8 +26,6 @@ services:
   mariadb:
     image: mariadb:11.4.1-rc-jammy
     container_name: mariadb
-    env_file:
-      - ./configs/.env
     ports:
       - "3306:${MARIA_PORT}"
     networks:

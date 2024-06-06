@@ -27,23 +27,18 @@ type User struct {
 
 type Activity struct {
 	ID			uint `json: "id"`
-
 	UserID		int `json: "user_id"`
 	User 		User `gorm:"foreignKey:UserID"`
-
 	M5StickID	int `json: "m5stick_id"`
 	M5Stick		M5Stick `gorm:"foreignKey:M5StickID"`
-
 	CreatedAt	int64 `json: "created_at"`
 }
 
 type M5Stick struct {
 	ID    int
 	Mac   string
-	
 	RoleId int
 	Role   Role `gorm:"foreignKey:RoleId"`
-
 	LocationId int
 	Location   Location `gorm:"foreignKey:LocationId"`
 }
@@ -168,13 +163,13 @@ func GetActivitiesFromDB(start_time int64, end_time int64, role string) ([]Activ
 	return activities, nil
 }
 
+// Receive the role name, and if it does not exist in the DB, add a new role.
 func AddRoleToDB(roleName string) error {
 	db, err := ConnectToDB()
 	if err != nil {
 		return err
 	}
 
-	// 同じ名前のRoleがすでに存在するかを確認
 	var existingRole Role
 	if err := db.Where("name = ?", roleName).First(&existingRole).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
@@ -185,20 +180,19 @@ func AddRoleToDB(roleName string) error {
 	}
 	role := Role{Name: roleName}
 
-	// データベースにRoleを追加
 	if result := db.Create(&role); result.Error != nil {
 		return result.Error
 	}
 	return nil
 }
 
+// Receive the location name, and if it does not exist in the DB, add a new location.
 func AddLocationToDB(locationName string) error {
 	db, err := ConnectToDB()
 	if err != nil {
 		return err
 	}
 
-	// 同じ名前のLocationがすでに存在するかを確認
 	var existingLocation Location
 	if err := db.Where("name = ?", locationName).First(&existingLocation).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
@@ -209,20 +203,22 @@ func AddLocationToDB(locationName string) error {
 	}
 	location := Location{Name: locationName}
 
-	// データベースにLocationを追加
 	if result := db.Create(&location); result.Error != nil {
 		return result.Error
 	}
 	return nil
 }
 
+/*
+Receives the MAC address, role name, and location name,
+and if the same MAC address does not exist in the DB, adds a new M5stick
+*/
 func AddM5StickToDB(mac string, roleName string, locationName string) error {
 	db, err := ConnectToDB()
 	if err != nil {
 		return err
 	}
 
-	// 同じMACアドレスのM5Stickがすでに存在するかを確認
 	var existingM5Stick M5Stick
 	if err := db.Where("mac = ?", mac).First(&existingM5Stick).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
@@ -231,36 +227,32 @@ func AddM5StickToDB(mac string, roleName string, locationName string) error {
 	} else {
 		return errors.New("M5Stick already exists")
 	}
-	// roleNameからRoleIdを取得
+
 	var role Role
 	if err := db.Where("name = ?", roleName).First(&role).Error; err != nil {
 		return err
 	}
-	roleId := role.ID
 
-	// locationNameからLocationIdを取得
 	var location Location
 	if err := db.Where("name = ?", locationName).First(&location).Error; err != nil {
 		return err
 	}
-	locationId := location.ID
 
-	m5Stick := M5Stick{Mac: mac, RoleId: roleId, LocationId: locationId}
+	m5Stick := M5Stick{Mac: mac, RoleId: role.ID, LocationId: location.ID}
 
-	// データベースにM5Stickを追加
 	if result := db.Create(&m5Stick); result.Error != nil {
 		return result.Error
 	}
 	return nil
 }
 
+// Receives uid, login, and wallet, and if the same login does not exist in the DB, adds a new user.
 func AddUserToDB(uid string, login string, wallet string) error {
 	db, err := ConnectToDB()
 	if err != nil {
 		return err
 	}
 
-	// 同じLoginのUserがすでに存在するかを確認
 	var existingUser User
 	if err := db.Where("login = ?", login).First(&existingUser).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
@@ -271,76 +263,70 @@ func AddUserToDB(uid string, login string, wallet string) error {
 	}
 	user := User{UID: uid, Login: login, Wallet: wallet}
 
-	// データベースにUserを追加
 	if result := db.Create(&user); result.Error != nil {
 		return result.Error
 	}
 	return nil
 }
 
-//loginがすでに存在する場合uidとwalletを更新
+//Receive uid, login, and wallet, and if the same login exists in the DB, update the user data.
 func EditUserInDB(uid string, login string, wallet string) error {
 	db, err := ConnectToDB()
 	if err != nil {
 		return err
 	}
 
-	// 同じloginのUserがすでに存在するかを確認
 	var existingUser User
 	if err := db.Where("login = ?", login).First(&existingUser).Error; err != nil {
 		return err
 	}
 
-	// Userを更新
 	if result := db.Model(&existingUser).Updates(User{UID: uid, Wallet: wallet}); result.Error != nil {
 		return result.Error
 	}
 	return nil
 }
 
+// Receives the login and returns whether the login exists in the DB.
 func UserExists(login string) bool {
 	db, err := ConnectToDB()
 	if err != nil {
-		panic("database error")
+		return false
 	}
 
 	var user User
 	if err := db.Where("login = ?", login).First(&user).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return false
-		}
-		// Handle other errors
-		panic("database error")
+		return false
 	}
 	return true
 }
 
-func AddUidToExistUser(login string, uid string) bool {
+// Receives the login and uid, and if the login does not have a uid, adds it.
+func AddUidToExistUser(login string, uid string) error {
 	db, err := ConnectToDB()
 	if err != nil {
-		panic("database error")
+		return err
 	}
 
 	var user User
-	// uidが空のloginを検索
 	if err := db.Where("login = ? AND uid = ?", login, "").First(&user).Error; err != nil {
-		// uidが空のloginがなければfalse
-		if err == gorm.ErrRecordNotFound {
-			return false
-		}
-		// Handle other errors
-		panic("database error")
+		return err
 	}
+
 	if err := db.Model(&user).Update("uid", uid).Error; err != nil {
-		panic("database error")
+		return err
 	}
-	return true
+	return nil
 }
 
+/*
+Receives an array of shifts, adds a shift that does not exist in the DB,
+and returns an array of added dates.
+*/
 func AddShiftToDB(schedule []Schedule) ([]string, error) {
 	db, err := ConnectToDB()
 	if err != nil {
-		panic("database error")
+		return nil, err
 	}
 
 	var addedDate []string
@@ -352,18 +338,15 @@ func AddShiftToDB(schedule []Schedule) ([]string, error) {
 		}
 		flag = false
 		for _, l := range s.Login {
-			// loginからUserIDを取得
 			userId, err := getUserIdFromLogin(db, l)
 			if err != nil {
 				return nil, err
 			}
-			// s.dateとloginが一致するシフトがすでに存在した場合はスキップ
 			var shift Shift
 			if err := db.Where("user_id = ? AND date = ?", userId, s.Date).First(&shift).Error; err != nil {
 				if err != gorm.ErrRecordNotFound {
 					return nil, err
 				}
-				// s.dateとlogin情報を追加
 				shift = Shift{Date: s.Date, UserID: userId}
 				if result := db.Create(&shift); result.Error != nil {
 					return nil, result.Error
@@ -380,6 +363,7 @@ func AddShiftToDB(schedule []Schedule) ([]string, error) {
 	return addedDate, nil
 }
 
+// Receive the login and *gorm.DB, and return the user ID.
 func getUserIdFromLogin(db *gorm.DB, login string) (int, error) {
 	var user User
 	if err := db.Where("login = ?", login).First(&user).Error; err != nil {
@@ -388,6 +372,7 @@ func getUserIdFromLogin(db *gorm.DB, login string) (int, error) {
 	return user.ID, nil
 }
 
+// Receive the uid and MAC address, and add a new activity.
 func AddActivityToDB(uid string, mac string) (int, string, string, error) {
 	db, err := ConnectToDB()
 	if err != nil {
@@ -414,7 +399,6 @@ func AddActivityToDB(uid string, mac string) (int, string, string, error) {
 
 	activity := Activity{UserID: user.ID, M5StickID: m5Stick.ID, CreatedAt: time.Now().Unix()}
 
-	// データベースにActivityを追加
 	if result := db.Create(&activity); result.Error != nil {
 		return http.StatusBadRequest, "", "", result.Error
 	}
