@@ -66,7 +66,6 @@ func getQueryAboutTime(c *gin.Context) (int64, int64, error) {
 
 	start := c.Query("start")
 	if start == "" {
-		//startパラメータがない場合は当日の0時0分0秒を取得
 		start_time = now.BeginningOfDay().Unix()
 	} else {
 		start_time, err = strconv.ParseInt(start, 10, 64)
@@ -76,7 +75,6 @@ func getQueryAboutTime(c *gin.Context) (int64, int64, error) {
 	}
 	end := c.Query("end")
 	if end == "" {
-		//endパラメータがない場合はstart_timeの24時間後を取得
 		end_time = start_time + 24*60*60
 	} else {
 		end_time, err = strconv.ParseInt(end, 10, 64)
