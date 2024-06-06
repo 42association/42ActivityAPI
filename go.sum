@@ -1,5 +1,7 @@
 filippo.io/edwards25519 v1.1.0 h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
 filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
+github.com/42association/42ActivityAPI v0.0.0-20240603124043-7e5808ac895f h1:ZhkRf1njDDRBuuibyM5gPthf43LO4AWH6Q8yWQdsyY4=
+github.com/42association/42ActivityAPI v0.0.0-20240603124043-7e5808ac895f/go.mod h1:QHVAfWpa0bqnICq2p8OK8zz1Ehm8hzdihWE/t+ikoyM=
 github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1O2AihPM=
 github.com/bytedance/sonic v1.10.0-rc/go.mod h1:ElCzW+ufi8qKqNW0FY314xriJhyJhuoJ3gFZdAHF7NM=
 github.com/bytedance/sonic v1.11.3 h1:jRN+yEjakWh8aK5FzrciUHG8OFXK+4/KrAX/ysEtHAA=

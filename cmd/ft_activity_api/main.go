@@ -7,8 +7,8 @@ import (
 	"os"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/cors"
-	"github.com/42association/42ActivityAPI/internal/handlers"
-	"github.com/42association/42ActivityAPI/internal/database"
+	"github.com/42association/42ActivityAPI/internal/handlers/handler"
+	"github.com/42association/42ActivityAPI/internal/accessdb/accessdb"
 )
 
 type Config struct {

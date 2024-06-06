@@ -1,4 +1,4 @@
-package handlers
+package handler
 
 import (
 	"github.com/gin-gonic/gin"
@@ -8,7 +8,7 @@ import (
 	"log"
 	"io"
 	"errors"
-	"github.com/42association/42ActivityAPI/internal/database"
+	"github.com/42association/42ActivityAPI/internal/accessdb/accessdb"
 )
 
 type TokenProperty struct {
