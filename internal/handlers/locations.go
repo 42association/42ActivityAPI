@@ -1,8 +1,9 @@
-package main
+package handlers
 
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"github.com/42association/42ActivityAPI/internal/database"
 )
 
 type LocationRequestData struct {
