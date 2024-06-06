@@ -83,56 +83,7 @@ func getDSN() (string, error) {
 	return dsn, nil
 }
 
-func Seed(db *gorm.DB) error {
-	// Create a new user
-	users := []User{{UID: "foo", Login: "kakiba", Wallet:"0xA0D9F5854A77D4906906BCEDAAEBB3A39D61165A"}, {UID: "bar", Login: "tanemura", Wallet:"42156DF83404D7833BE3DBDB5D1B367964FDF037"}}
-	for _, user := range users {
-		if result := db.Create(&user); result.Error != nil {
-			return result.Error
-		}
-	}
-
-	shifts := []Shift{{Date: "2024-06-01", UserID: 1}, {Date: "2024-06-02", UserID: 2}}
-	for _, shift := range shifts {
-		if result := db.Create(&shift); result.Error != nil {
-			return result.Error
-		}
-	}
-
-	locations := []Location{{Name: "F1"}, {Name: "F2"}}
-	for _, location := range locations {
-		if result := db.Create(&location); result.Error != nil {
-			return result.Error
-		}
-	}
-
-	roles := []Role{{Name: "Cleaning"}, {Name: "UsingShower"}}
-	for _, role := range roles {
-		if result := db.Create(&role); result.Error != nil {
-			return result.Error
-		}
-	}
-
-	m5Sticks := []M5Stick{{Mac: "00:00:00:00:00:00", RoleId: 1, LocationId: 1}, {Mac: "11:11:11:11:11:11", RoleId: 2, LocationId: 2}}
-	for _, m5Stick := range m5Sticks {
-		if result := db.Create(&m5Stick); result.Error != nil {
-			return result.Error
-		}
-	}
-
-	activities := []Activity{
-		{UserID: 1, M5StickID: 1, CreatedAt: time.Now().Unix()},
-		{UserID: 2, M5StickID: 2, CreatedAt: time.Now().Unix()},
-	}
-	for _, activity := range activities {
-		if result := db.Create(&activity); result.Error != nil {
-			return result.Error
-		}
-	}
-
-	return nil
-}
-
+// Receives the date and returns the shifts for that date.
 func GetShiftFromDB(date string) ([]Shift, error) {
 	db, err := ConnectToDB()
 	if err != nil {
@@ -145,6 +96,10 @@ func GetShiftFromDB(date string) ([]Shift, error) {
 	return shifts, nil
 }
 
+/*
+Receives start_time, end_time, and role, and returns activities that were created between start_time,
+and end_time and have a matching M5stick role.
+*/
 func GetActivitiesFromDB(start_time int64, end_time int64, role string) ([]Activity, error) {
 	db, err := ConnectToDB()
 	if err != nil {

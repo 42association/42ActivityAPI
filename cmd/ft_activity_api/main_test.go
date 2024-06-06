@@ -12,6 +12,7 @@ import (
 	"os"
 	"42ActivityAPI/internal/handlers"
 	"42ActivityAPI/internal/accessdb"
+	"42ActivityAPI/internal/loadconfig"
 )
 
 func setupTestDB() *gorm.DB {
@@ -44,7 +45,7 @@ func TestGetQueryAboutTime(t *testing.T) {
 
 
 func TestLoadConfig(t *testing.T) {
-	config, _ := LoadConfig()
+	config, _ := loadconfig.LoadConfig()
 	assert.Equal(t, os.Getenv("UID"), config.UID)
 	assert.Equal(t, os.Getenv("SECRET"), config.Secret)
 	assert.Equal(t, os.Getenv("CALLBACK_URL"), config.CallbackURL)
@@ -67,7 +68,7 @@ func MockLoadConfig() (*MockConfig, error) {
 
 func TestShowIndexPage(t *testing.T) {
     router := gin.New()
-    router.LoadHTMLGlob("templates/*")
+    router.LoadHTMLGlob("web/templates/*")
 
     router.GET("/", ShowIndexPage)
 
@@ -111,7 +112,7 @@ func TestRedirectToIndexWithUID(t *testing.T) {
 func TestShowCallbackPage(t *testing.T) {
 	router := gin.New()
 
-	router.LoadHTMLGlob("templates/*.html")
+	router.LoadHTMLGlob("web/templates/*.html")
 	router.GET("/callback", ShowCallbackPage)
 
 	req, err := http.NewRequest("GET", "/callback", nil)
@@ -176,4 +177,54 @@ func testUserExists(login string) bool {
 func TestAddDuplicated(t *testing.T) {
 	assert.Equal(t, true, testUserExists("kakiba"))
 	assert.Equal(t, false, testUserExists("anonymous"))
+}
+
+func Seed(db *gorm.DB) error {
+	// Create a new user
+	users := []User{{UID: "foo", Login: "kakiba", Wallet:"0xA0D9F5854A77D4906906BCEDAAEBB3A39D61165A"}, {UID: "bar", Login: "tanemura", Wallet:"42156DF83404D7833BE3DBDB5D1B367964FDF037"}}
+	for _, user := range users {
+		if result := db.Create(&user); result.Error != nil {
+			return result.Error
+		}
+	}
+
+	shifts := []Shift{{Date: "2024-06-01", UserID: 1}, {Date: "2024-06-02", UserID: 2}}
+	for _, shift := range shifts {
+		if result := db.Create(&shift); result.Error != nil {
+			return result.Error
+		}
+	}
+
+	locations := []Location{{Name: "F1"}, {Name: "F2"}}
+	for _, location := range locations {
+		if result := db.Create(&location); result.Error != nil {
+			return result.Error
+		}
+	}
+
+	roles := []Role{{Name: "Cleaning"}, {Name: "UsingShower"}}
+	for _, role := range roles {
+		if result := db.Create(&role); result.Error != nil {
+			return result.Error
+		}
+	}
+
+	m5Sticks := []M5Stick{{Mac: "00:00:00:00:00:00", RoleId: 1, LocationId: 1}, {Mac: "11:11:11:11:11:11", RoleId: 2, LocationId: 2}}
+	for _, m5Stick := range m5Sticks {
+		if result := db.Create(&m5Stick); result.Error != nil {
+			return result.Error
+		}
+	}
+
+	activities := []Activity{
+		{UserID: 1, M5StickID: 1, CreatedAt: time.Now().Unix()},
+		{UserID: 2, M5StickID: 2, CreatedAt: time.Now().Unix()},
+	}
+	for _, activity := range activities {
+		if result := db.Create(&activity); result.Error != nil {
+			return result.Error
+		}
+	}
+
+	return nil
 }
