@@ -3,26 +3,22 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"fmt"
 	"encoding/json"
 	"net/url"
 	"log"
 	"io"
+	"errors"
 )
 
-type Token struct {
+type TokenProperty struct {
 	AccessToken string `json:"access_token"`
 	TokenType   string `json:"token_type"`
 	ExpiresIn   int    `json:"expires_in"`
 }
 
-type RequestData struct {
+type AuthenticationData struct {
 	Code string `json:"code"`
 	Uid  string `json:"uid"`
-}
-
-type UserData struct {
-	IntraName string `json:"intra_name"`
 }
 
 /*
@@ -30,7 +26,7 @@ Receives the uid and code, and gets user information from intra.
 If the user is not registered in the database, registers it and returns the login and uid.
 */
 func HandleUIDSubmission(c *gin.Context) {
-	var requestData RequestData
+	var requestData AuthenticationData
 
 	if err := c.BindJSON(&requestData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -47,18 +43,18 @@ func HandleUIDSubmission(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Code is invalid"})
 		return
 	}
-	userData, err := fetchUserData(token.AccessToken)
+	intraName, err := fetchUserData(token.AccessToken)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get user infomation"})
 		return
 	}
-	if userExists(userData.IntraName) {
-		if addUidToExistUser(userData.IntraName, requestData.Uid) == false {
+	if userExists(intraName) {
+		if addUidToExistUser(intraName, requestData.Uid) == false {
 			c.JSON(http.StatusConflict, gin.H{"error": "User with this login is already associated with a uid"})
 			return
 		}
 	} else {
-		if err := addUserToDB(requestData.Uid, userData.IntraName, ""); err != nil {
+		if err := addUserToDB(requestData.Uid, intraName, ""); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
@@ -66,84 +62,92 @@ func HandleUIDSubmission(c *gin.Context) {
 
 	response := make(gin.H)
 
-	response["login"] = userData.IntraName
+	response["login"] = intraName
 	response["uid"] = requestData.Uid
 
 	c.JSON(http.StatusOK, response)
 	return
 }
 
-func exchangeCodeForToken(code string) *Token {
-
+// Receive the code and return the access token.
+func exchangeCodeForToken(code string) *TokenProperty {
 	config, err := LoadConfig()
 	if err != nil {
-		log.Fatalf("Failed to load configuration: %v\n", err)
+		log.Println("Failed to load configuration: ", err)
+		return nil
 	}
 
-	tokenURL := fmt.Sprintf("https://api.intra.42.fr/oauth/token?grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s&redirect_uri=%s",
-		config.UID, config.Secret, code, url.QueryEscape(config.CallbackURL))
+	query := url.Values{
+		"grant_type": []string{"authorization_code"},
+		"client_id":  []string{config.UID},
+		"client_secret": []string{config.Secret},
+		"code": []string{code},
+		"redirect_uri": []string{url.QueryEscape(config.CallbackURL)},
+	}
 
-	resp, err := http.PostForm(tokenURL, url.Values{})
+	endPointURL := "https://api.intra.42.fr/oauth/token?"
+
+	resp, err := http.PostForm(endPointURL, query)
 	if err != nil {
-		fmt.Printf("Error exchanging code for token: %v\n", err)
+		log.Println("Error exchanging code for token: ", err)
 		return nil
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("Error exchanging code for token: %s\n", resp.Status)
+		log.Printf("Error exchanging code for token: %s\n", resp.Status)
 		return nil
 	}
 
-	var token Token
-	err = json.NewDecoder(resp.Body).Decode(&token)
+	var tokenProperty TokenProperty
+	err = json.NewDecoder(resp.Body).Decode(&tokenProperty)
 	if err != nil {
-		fmt.Printf("Error decoding token: %v\n", err)
+		log.Printf("Error decoding token: %v\n", err)
 		return nil
 	}
 
-	return &token
+	return &tokenProperty
 }
 
 /*
 Receive the access token, get the user information
 using 42 API, and return the intra name.
 */
-func fetchUserData(accessToken string) (*UserData, error) {
+func fetchUserData(accessToken string) (string, error) {
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", "https://api.intra.42.fr/v2/me", nil)
-	req.Header.Set("Authorization", "Bearer "+accessToken)
+	req.Header.Set("Authorization", "Bearer " + accessToken)
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Printf("Error fetching user data: %v\n", err)
-		return nil, err
+		log.Println("Error fetching user data: ", err)
+		return "", err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("Error fetching user data: %s\n", resp.Status)
-		return nil, fmt.Errorf("HTTP error: %s", resp.Status)
+		log.Printf("Error fetching user data: %s\n", resp.Status)
+		return "", errors.New("Failed to fetch user data.")
 	}
 
 	userData, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Printf("Error reading user data: %v\n", err)
-		return nil, err
+		log.Printf("Error reading user data: %v\n", err)
+		return "", err
 	}
 
 	var userJSON map[string]interface{}
 	err = json.Unmarshal(userData, &userJSON)
 	if err != nil {
-		fmt.Printf("Error parsing user data: %v\n", err)
-		return nil, err
+		log.Printf("Error parsing user data: %v\n", err)
+		return "", err
 	}
 
 	intraName, ok := userJSON["login"].(string)
 	if !ok {
-		fmt.Println("Login field not found or not a string")
-		return nil, fmt.Errorf("login field not found or not a string")
+		log.Println("Login field not found or not a string")
+		return "", errors.New("Failed to get user data.")
 	}
 
-	return &UserData{IntraName: intraName}, nil
+	return intraName, nil
 }
