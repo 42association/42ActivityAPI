@@ -8,17 +8,18 @@ on:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+  workflow_dispatch:
 
 defaults:
   run:
     shell: bash
-    working-directory: ./api/src
+    working-directory: ./
 
 jobs:
   build:
     defaults:
       run:
-        working-directory: ./api/src
+        working-directory: ./
     runs-on: ubuntu-latest
     env:
       MARIA_ROOT_PASS: mariadb-root-password"
@@ -37,8 +38,8 @@ jobs:
         with:
           go-version: "1.22.1"
       - name: Build
-        run: go build
+        run: go build ./cmd/ft_activity_api
       - name: Prepare test
-        run: sudo apt install build-essential && export CGO_ENABLED=1
+        run: sudo apt update && sudo apt install -y build-essential && export CGO_ENABLED=1
       - name: Test
-        run: go test
+        run: go test ./cmd/ft_activity_api

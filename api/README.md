@@ -2,4 +2,4 @@
 
 
 ## Reference
-[API reference](./api/openapi.yml)
+[API reference](./openapi/openapi.yml)
