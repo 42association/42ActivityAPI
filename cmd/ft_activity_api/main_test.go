@@ -13,6 +13,7 @@ import (
 	"42ActivityAPI/internal/handlers"
 	"42ActivityAPI/internal/accessdb"
 	"42ActivityAPI/internal/loadconfig"
+	"time"
 )
 
 func setupTestDB() *gorm.DB {
@@ -38,11 +39,10 @@ func TestGetQueryAboutTime(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Request = req
-	start, end, _ := getQueryAboutTime(c)
+	start, end, _ := handlers.GetQueryAboutTime(c)
 	assert.Equal(t, int64(100), start)
 	assert.Equal(t, int64(200), end)
 }
-
 
 func TestLoadConfig(t *testing.T) {
 	config, _ := loadconfig.LoadConfig()
@@ -68,7 +68,7 @@ func MockLoadConfig() (*MockConfig, error) {
 
 func TestShowIndexPage(t *testing.T) {
     router := gin.New()
-    router.LoadHTMLGlob("web/templates/*")
+    router.LoadHTMLGlob("../../web/templates/*")
 
     router.GET("/", ShowIndexPage)
 
@@ -112,7 +112,7 @@ func TestRedirectToIndexWithUID(t *testing.T) {
 func TestShowCallbackPage(t *testing.T) {
 	router := gin.New()
 
-	router.LoadHTMLGlob("web/templates/*.html")
+	router.LoadHTMLGlob("../../web/templates/*.html")
 	router.GET("/callback", ShowCallbackPage)
 
 	req, err := http.NewRequest("GET", "/callback", nil)
@@ -163,7 +163,7 @@ func testUserExists(login string) bool {
 		panic("database error")
 	}
 
-	var user User
+	var user accessdb.User
 	if err := db.Where("login = ?", login).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return false

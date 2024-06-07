@@ -16,7 +16,7 @@ type ActivityRequestData struct {
 
 // Handles the endpoint that gets activities with role cleaning.
 func GetActivityCleanData(c *gin.Context) {
-	start_time, end_time, err := getQueryAboutTime(c)
+	start_time, end_time, err := GetQueryAboutTime(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid query"})
 		return
@@ -59,7 +59,7 @@ Determine start_time and end_time from the query.
 If there is no start parameter, the start_time will be 00:00:00 on the execution date.
 If there is no end parameter, the end_time will be 24 hours after the start_time.
 */
-func getQueryAboutTime(c *gin.Context) (int64, int64, error) {
+func GetQueryAboutTime(c *gin.Context) (int64, int64, error) {
 	var start_time int64
 	var end_time int64
 	var err error
