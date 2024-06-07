@@ -12,13 +12,13 @@ on:
 defaults:
   run:
     shell: bash
-    working-directory: ../../
+    working-directory: ./
 
 jobs:
   build:
     defaults:
       run:
-        working-directory: ../../
+        working-directory: ./
     runs-on: ubuntu-latest
     env:
       MARIA_ROOT_PASS: mariadb-root-password"
