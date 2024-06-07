@@ -73,11 +73,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/responseUserDataArray'
         '400':
-          description: "失敗。エラーメッセージをjsonで返します"
+          description: "失敗。エラーメッセージと追加に成功したuserの配列をjsonで返します"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                type: object
+                properties:
+                  error: {type: string, example: "Error message"}
+                  users: {type: array, example: ["a", "b", "c"]}
     put:
       summary: "ユーザの編集"
       description: "intra名に紐づくuidやwalletアドレスを更新します"
@@ -269,8 +272,7 @@ components:
       properties:
         users: 
           type: array
-          items: 
-            $ref: '#/components/schemas/UserData'
+          example: ["a", "b", "c"]
     addedDate:
       type: object
       properties:
