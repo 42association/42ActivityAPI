@@ -45,7 +45,7 @@ func main() {
 
 	router.POST("/m5sticks", handlers.AddM5Stick)
 
-	router.POST("/users", handlers.AddUser)
+	router.POST("/users", handlers.AddUsers)
 	router.PUT("/users", handlers.EditUser)
 
 	router.Run(":" + os.Getenv("PORT"))
