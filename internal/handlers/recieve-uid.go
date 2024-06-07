@@ -1,15 +1,15 @@
 package handlers
 
 import (
-	"github.com/gin-gonic/gin"
-	"net/http"
-	"encoding/json"
-	"net/url"
-	"log"
-	"io"
-	"errors"
 	"42ActivityAPI/internal/accessdb"
 	"42ActivityAPI/internal/loadconfig"
+	"encoding/json"
+	"errors"
+	"github.com/gin-gonic/gin"
+	"io"
+	"log"
+	"net/http"
+	"net/url"
 )
 
 type TokenProperty struct {
@@ -80,11 +80,11 @@ func exchangeCodeForToken(code string) *TokenProperty {
 	}
 
 	query := url.Values{
-		"grant_type": []string{"authorization_code"},
-		"client_id":  []string{config.UID},
+		"grant_type":    []string{"authorization_code"},
+		"client_id":     []string{config.UID},
 		"client_secret": []string{config.Secret},
-		"code": []string{code},
-		"redirect_uri": []string{url.QueryEscape(config.CallbackURL)},
+		"code":          []string{code},
+		"redirect_uri":  []string{url.QueryEscape(config.CallbackURL)},
 	}
 
 	endPointURL := "https://api.intra.42.fr/oauth/token?"
@@ -118,7 +118,7 @@ using 42 API, and return the intra name.
 func fetchUserData(accessToken string) (string, error) {
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", "https://api.intra.42.fr/v2/me", nil)
-	req.Header.Set("Authorization", "Bearer " + accessToken)
+	req.Header.Set("Authorization", "Bearer "+accessToken)
 
 	resp, err := client.Do(req)
 	if err != nil {

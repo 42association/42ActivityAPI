@@ -1,12 +1,12 @@
 package handlers
 
 import (
+	"42ActivityAPI/internal/accessdb"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"time"
 	"regexp"
-	"errors"
-	"42ActivityAPI/internal/accessdb"
+	"time"
 )
 
 // Handle the endpoint that gets the shift.

@@ -1,8 +1,8 @@
 package accessdb
 
 import (
-	"gorm.io/gorm"
 	"errors"
+	"gorm.io/gorm"
 )
 
 // Receive the location name, and if it does not exist in the DB, add a new location.

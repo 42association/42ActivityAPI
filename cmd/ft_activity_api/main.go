@@ -1,19 +1,19 @@
 package main
 
 import (
+	"42ActivityAPI/internal/accessdb"
+	"42ActivityAPI/internal/handlers"
+	"42ActivityAPI/internal/loadconfig"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"os"
-	"github.com/gin-gonic/gin"
-	"github.com/gin-contrib/cors"
-	"42ActivityAPI/internal/handlers"
-	"42ActivityAPI/internal/accessdb"
-	"42ActivityAPI/internal/loadconfig"
 )
 
 func main() {
 	// Initialize database
-	_, err := accessdb.ConnectToDB();
+	_, err := accessdb.ConnectToDB()
 	if err != nil {
 		log.Println("Failed to initialize database: ", err)
 		return

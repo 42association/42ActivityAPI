@@ -31,7 +31,7 @@ func AddShiftToDB(schedule []Schedule) ([]string, error) {
 	var flag bool
 
 	for _, s := range schedule {
-		if s.Date == "" || len(s.Login)	== 0 {
+		if s.Date == "" || len(s.Login) == 0 {
 			continue
 		}
 		flag = false

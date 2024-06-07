@@ -1,9 +1,9 @@
 package handlers
 
 import (
+	"42ActivityAPI/internal/accessdb"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"42ActivityAPI/internal/accessdb"
 )
 
 type LocationRequestData struct {

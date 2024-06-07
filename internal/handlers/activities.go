@@ -1,12 +1,12 @@
 package handlers
 
 import (
+	"42ActivityAPI/internal/accessdb"
+	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/now"
 	"net/http"
 	"strconv"
-	"github.com/jinzhu/now"
-	"errors"
-	"42ActivityAPI/internal/accessdb"
 )
 
 type ActivityRequestData struct {

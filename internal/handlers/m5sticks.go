@@ -1,14 +1,14 @@
 package handlers
 
 import (
+	"42ActivityAPI/internal/accessdb"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"42ActivityAPI/internal/accessdb"
 )
 
 type M5StickRequestData struct {
-	Mac string `json:"mac"`
-	RoleName string `json:"role"`
+	Mac          string `json:"mac"`
+	RoleName     string `json:"role"`
 	LocationName string `json:"location"`
 }
 

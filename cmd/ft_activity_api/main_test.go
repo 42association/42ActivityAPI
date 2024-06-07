@@ -1,18 +1,18 @@
 package main
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
-	"github.com/gin-gonic/gin"
-	"gorm.io/driver/sqlite"
-	_ "modernc.org/sqlite"
-	"gorm.io/gorm"
-	"net/http/httptest"
-	"net/http"
-	"os"
-	"42ActivityAPI/internal/handlers"
 	"42ActivityAPI/internal/accessdb"
+	"42ActivityAPI/internal/handlers"
 	"42ActivityAPI/internal/loadconfig"
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
+	_ "modernc.org/sqlite"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"testing"
 	"time"
 )
 
@@ -35,7 +35,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestGetQueryAboutTime(t *testing.T) {
-    req, _ := http.NewRequest("GET", "/activities/cleanings?start=100&end=200", nil)
+	req, _ := http.NewRequest("GET", "/activities/cleanings?start=100&end=200", nil)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Request = req
@@ -52,38 +52,38 @@ func TestLoadConfig(t *testing.T) {
 }
 
 type MockConfig struct {
-    UID         string
-    CallbackURL string
+	UID         string
+	CallbackURL string
 }
 
 // Mock LoadConfig function for testing purposes
 func MockLoadConfig() (*MockConfig, error) {
-    // Mocked configuration values
-    config := &MockConfig{
-        UID:         "mockUID",
-        CallbackURL: "http://mock-callback-url.com",
-    }
-    return config, nil
+	// Mocked configuration values
+	config := &MockConfig{
+		UID:         "mockUID",
+		CallbackURL: "http://mock-callback-url.com",
+	}
+	return config, nil
 }
 
 func TestShowIndexPage(t *testing.T) {
-    router := gin.New()
-    router.LoadHTMLGlob("../../web/templates/*")
+	router := gin.New()
+	router.LoadHTMLGlob("../../web/templates/*")
 
-    router.GET("/", ShowIndexPage)
+	router.GET("/", ShowIndexPage)
 
-    req, err := http.NewRequest("GET", "/", nil)
-    if err != nil {
-        t.Fatal(err)
-    }
+	req, err := http.NewRequest("GET", "/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-    w := httptest.NewRecorder()
-    c, _ := gin.CreateTestContext(w)
-    c.Request = req
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = req
 
-    router.ServeHTTP(w, req)
+	router.ServeHTTP(w, req)
 
-    assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 
 }
 
@@ -137,7 +137,7 @@ func testConnectToDB() (*gorm.DB, error) {
 		return nil, err
 	}
 	db.AutoMigrate(&accessdb.Shift{}, &accessdb.User{}, &accessdb.M5Stick{}, &accessdb.Activity{}, &accessdb.Location{}, &accessdb.Role{})
-	return db, nil	
+	return db, nil
 }
 
 func testGetShiftFromDB(date string) ([]accessdb.Shift, error) {
@@ -146,9 +146,9 @@ func testGetShiftFromDB(date string) ([]accessdb.Shift, error) {
 		return nil, err
 	}
 	var shifts []accessdb.Shift
-    if err := db.Preload("User").Where("date = ?", date).Find(&shifts).Error; err != nil {
-        return nil, err
-    }
+	if err := db.Preload("User").Where("date = ?", date).Find(&shifts).Error; err != nil {
+		return nil, err
+	}
 	return shifts, nil
 }
 
@@ -181,7 +181,7 @@ func TestAddDuplicated(t *testing.T) {
 
 func Seed(db *gorm.DB) error {
 	// Create a new user
-	users := []accessdb.User{{UID: "foo", Login: "kakiba", Wallet:"0xA0D9F5854A77D4906906BCEDAAEBB3A39D61165A"}, {UID: "bar", Login: "tanemura", Wallet:"42156DF83404D7833BE3DBDB5D1B367964FDF037"}}
+	users := []accessdb.User{{UID: "foo", Login: "kakiba", Wallet: "0xA0D9F5854A77D4906906BCEDAAEBB3A39D61165A"}, {UID: "bar", Login: "tanemura", Wallet: "42156DF83404D7833BE3DBDB5D1B367964FDF037"}}
 	for _, user := range users {
 		if result := db.Create(&user); result.Error != nil {
 			return result.Error

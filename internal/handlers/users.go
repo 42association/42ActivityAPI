@@ -1,14 +1,14 @@
 package handlers
 
 import (
+	"42ActivityAPI/internal/accessdb"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"42ActivityAPI/internal/accessdb"
 )
 
 type UserRequestData struct {
-	Uid string `json:"uid"`
-	Login string `json:"login"`
+	Uid    string `json:"uid"`
+	Login  string `json:"login"`
 	Wallet string `json:"wallet"`
 }
 

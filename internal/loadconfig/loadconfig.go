@@ -1,8 +1,8 @@
 package loadconfig
 
 import (
-	"os"
 	"errors"
+	"os"
 )
 
 type Config struct {
