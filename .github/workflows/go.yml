@@ -40,6 +40,6 @@ jobs:
       - name: Build
         run: go build ./cmd/ft_activity_api
       - name: Prepare test
-        run: sudo apt install build-essential && export CGO_ENABLED=1
+        run: sudo apt update && sudo apt install -y build-essential && export CGO_ENABLED=1
       - name: Test
         run: go test ./cmd/ft_activity_api
