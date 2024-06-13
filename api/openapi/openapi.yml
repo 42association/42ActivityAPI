@@ -53,6 +53,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /shift/exchange:
+    post:
+      summary: "シフトの交換"
+      description: "特定のシフトの担当者を交換します"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/exchangeShiftData'
+              required:
+                - user1
+                - user2
+                - date1
+                - date2
+      responses:
+        '200':
+          description: "成功。交換後のシフトの配列を返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseExchangeDataArray'
+        '400':
+          description: "失敗。エラーメッセージをjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /users:
     post:
       summary: "ユーザの追加"
@@ -260,6 +288,29 @@ components:
           login: ["user1", "user2"]
         - date: "2024-05-02"
           login: ["user3", "user4"]
+    exchangeShiftData:
+      type: object
+      properties:
+        user1:
+          type: string
+          example: "user1"
+        user2:
+          type: string
+          example: "user2"
+        date1:
+          type: string
+          example: "YYYY-MM-DD"
+        date2:
+          type: string
+          example: "YYYY-MM-DD"
+    responseExchangeDataArray:
+      type: object
+      properties:
+        shifts:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/Shift'
     importUserData:
       type: object
       properties:
