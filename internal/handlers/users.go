@@ -6,49 +6,30 @@ import (
 	"net/http"
 )
 
-type UserRequestData struct {
-	Uid    string `json:"uid"`
-	Login  string `json:"login"`
-	Wallet string `json:"wallet"`
-}
-
-// Handle the endpoint to add a user.
-func AddUser(c *gin.Context) {
-	var requestData UserRequestData
+// Handle the endpoint to add users.
+func AddUsers(c *gin.Context) {
+	var requestData accessdb.Users
 
 	if err := c.BindJSON(&requestData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if requestData.Login == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Login is required"})
+	if len(requestData.Users) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User is not specified"})
 		return
 	}
-	if accessdb.UserExists(requestData.Login) {
-		c.JSON(http.StatusConflict, gin.H{"error": "User with this login already exists"})
+	if addedLogin, err := accessdb.AddUsersToDB(requestData.Users); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "users": addedLogin})
 		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{"users": addedLogin})
 	}
-	if err := accessdb.AddUserToDB(requestData.Uid, requestData.Login, requestData.Wallet); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	response := make(gin.H)
-
-	response["login"] = requestData.Login
-	if requestData.Uid != "" {
-		response["uid"] = requestData.Uid
-	}
-	if requestData.Wallet != "" {
-		response["wallet"] = requestData.Wallet
-	}
-
-	c.JSON(http.StatusOK, response)
 	return
 }
 
 // Handle the endpoint that updates the user.
 func EditUser(c *gin.Context) {
-	var requestData UserRequestData
+	var requestData accessdb.UserRequestData
 
 	if err := c.BindJSON(&requestData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

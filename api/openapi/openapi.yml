@@ -56,28 +56,31 @@ paths:
   /users:
     post:
       summary: "ユーザの追加"
-      description: "intra名とuidやwalletアドレスを追加します"
+      description: "任意人数のlogin, uid, walletをDBに追加します"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserData'
+              $ref: '#/components/schemas/importUserData'
               required:
-                - login
+                - users
       responses:
         '200':
-          description: "成功。追加したユーザをjsonで返します"
+          description: "成功。追加したuserの配列をjsonで返します"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserData'
+                $ref: '#/components/schemas/responseUserDataArray'
         '400':
-          description: "失敗。エラーメッセージをjsonで返します"
+          description: "失敗。エラーメッセージと追加に成功したuserの配列をjsonで返します"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                type: object
+                properties:
+                  error: {type: string, example: "Error message"}
+                  users: {type: array, example: ["a", "b", "c"]}
     put:
       summary: "ユーザの編集"
       description: "intra名に紐づくuidやwalletアドレスを更新します"
@@ -257,6 +260,19 @@ components:
           login: ["user1", "user2"]
         - date: "2024-05-02"
           login: ["user3", "user4"]
+    importUserData:
+      type: object
+      properties:
+        users: 
+          type: array
+          items: 
+            $ref: '#/components/schemas/UserData'
+    responseUserDataArray:
+      type: object
+      properties:
+        users: 
+          type: array
+          example: ["a", "b", "c"]
     addedDate:
       type: object
       properties:

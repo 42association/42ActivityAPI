@@ -59,6 +59,16 @@ type Schedule struct {
 	Login []string `json:"login"`
 }
 
+type UserRequestData struct {
+	Uid    string `json:"uid"`
+	Login  string `json:"login"`
+	Wallet string `json:"wallet"`
+}
+
+type Users struct {
+	Users []UserRequestData `json:"users"`
+}
+
 func ConnectToDB() (*gorm.DB, error) {
 	dsn, err := getDSN()
 	if err != nil {
