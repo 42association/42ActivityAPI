@@ -70,7 +70,8 @@ func getUserIdFromLogin(db *gorm.DB, login string) (int, error) {
 	return user.ID, nil
 }
 
-func ExchangeShiftsOnDB(login1, login2, date1, date2 string) (Shift, shift, error) {
+// Receives login and date, exchanges the shift, and returns the exchanged shift.
+func ExchangeShiftsOnDB(login1, login2, date1, date2 string) (*Shift, *Shift, error) {
 	db, err := ConnectToDB()
 	if err != nil {
 		return nil, nil, err
@@ -82,7 +83,9 @@ func ExchangeShiftsOnDB(login1, login2, date1, date2 string) (Shift, shift, erro
 	return shift1, shift2, nil
 }
 
-func transactionExchange(db *gorm.DB, login1, login2, date1, date2 string) (shift, shift, error) {
+func transactionExchange(db *gorm.DB, login1, login2, date1, date2 string) (*Shift, *Shift, error) {
+	var shift1, shift2 Shift
+	
 	err := db.Transaction(func(tx *gorm.DB) error {
 		userId1, err := getUserIdFromLogin(tx, login1)
 		if err != nil {
@@ -92,8 +95,6 @@ func transactionExchange(db *gorm.DB, login1, login2, date1, date2 string) (shif
 		if err != nil {
 			return err
 		}
-
-		var shift1, shift2 Shift
 		if err := tx.Where("user_id = ? AND date = ?", userId1, date1).First(&shift1).Error; err != nil {
 			return err
 		}
@@ -106,15 +107,16 @@ func transactionExchange(db *gorm.DB, login1, login2, date1, date2 string) (shif
 		if err := tx.Model(&shift2).Update("user_id", userId1).Error; err != nil {
 			return err
 		}
-		if err := tx.Where("id = ?", shift1.ID).First(&shift1).Error; err != nil {
+		if err := tx.Preload("User").Where("id = ?", shift1.ID).First(&shift1).Error; err != nil {
 			return err
 		}
-		if err := tx.Where("id = ?", shift2.ID).First(&shift2).Error; err != nil {
+		if err := tx.Preload("User").Where("id = ?", shift2.ID).First(&shift2).Error; err != nil {
 			return err
 		}
+		return nil
 	})
 	if err != nil {
 		return nil, nil, err
 	}
-	return shift1, shift2, nil
+	return &shift1, &shift2, nil
 }

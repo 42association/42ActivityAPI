@@ -33,9 +33,9 @@ func main() {
 
 	router.POST("/receive-uid", handlers.HandleUIDSubmission)
 
-	router.GET("/shift", handlers.GetShiftData)
-	router.POST("/shift", handlers.AddShiftData)
-	router.POST("/shift/exchange", handlers.ExchangeShiftData)
+	router.GET("/shifts", handlers.GetShiftData)
+	router.POST("/shifts", handlers.AddShiftData)
+	router.POST("/shifts/exchange", handlers.ExchangeShiftData)
 
 	router.POST("/activities", handlers.AddActivity)
 	router.GET("/activities/cleanings", handlers.GetActivityCleanData)
