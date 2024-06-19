@@ -53,6 +53,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    delete:
+      summary: "シフトの削除"
+      description: "特定の日付とそれに対応したloginのシフトを論理削除します。"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/deleteShiftsRequestBody'
+              required:
+                - login
+                - date
+      responses:
+        '200':
+          description: "成功。削除したシフトをjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Shift'
+        '400':
+          description: "失敗。エラーメッセージをjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /shifts/exchange:
     post:
       summary: "シフトの交換"
@@ -301,6 +326,15 @@ components:
           type: string
           example: "YYYY-MM-DD"
         date2:
+          type: string
+          example: "YYYY-MM-DD"
+    deleteShiftsRequestBody:
+      type: object
+      properties:
+        login:
+          type: string
+          example: "foo"
+        date:
           type: string
           example: "YYYY-MM-DD"
     usersArray:
