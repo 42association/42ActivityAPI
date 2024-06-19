@@ -4,9 +4,9 @@ info:
   description: "アクティビティを管理するAPIです"
   version: '1.0'
 servers:
-  - url: http://localhost:8000
+  - url: http://localhost:4242
 paths:
-  /shift:
+  /shifts:
     get:
       summary: "シフトの取得"
       description: "特定の日付のシフトを担当するUserの配列を返します"
@@ -22,7 +22,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/shiftData'
+                $ref: '#/components/schemas/shiftsArray'
         '400':
           description: "失敗。エラーメッセージをjsonで返します"
           content:
@@ -37,7 +37,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/importShiftData'
+              $ref: '#/components/schemas/addShiftsRequestBody'
               required:
                 - shift
       responses:
@@ -46,7 +46,35 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/addedDate'
+                $ref: '#/components/schemas/addShiftsResponse'
+        '400':
+          description: "失敗。エラーメッセージをjsonで返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /shifts/exchange:
+    post:
+      summary: "シフトの交換"
+      description: "特定のシフトの担当者を交換します"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/exchangeShiftsRequestBody'
+              required:
+                - login1
+                - login2
+                - date1
+                - date2
+      responses:
+        '200':
+          description: "成功。交換後のシフトの配列を返します"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/shiftsArray'
         '400':
           description: "失敗。エラーメッセージをjsonで返します"
           content:
@@ -62,7 +90,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/importUserData'
+              $ref: '#/components/schemas/usersArray'
               required:
                 - users
       responses:
@@ -71,7 +99,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/responseUserDataArray'
+                $ref: '#/components/schemas/usersArray'
         '400':
           description: "失敗。エラーメッセージと追加に成功したuserの配列をjsonで返します"
           content:
@@ -234,14 +262,14 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
-    shiftData:
+    shiftsArray:
       type: array
       items:
         type: object
         properties:
-            Shift:
+            shifts:
               $ref: '#/components/schemas/Shift'
-    importShiftData:
+    addShiftsRequestBody:
       type: array
       items:
         type: object
@@ -260,20 +288,29 @@ components:
           login: ["user1", "user2"]
         - date: "2024-05-02"
           login: ["user3", "user4"]
-    importUserData:
+    exchangeShiftsRequestBody:
+      type: object
+      properties:
+        login1:
+          type: string
+          example: "login1"
+        login2:
+          type: string
+          example: "login2"
+        date1:
+          type: string
+          example: "YYYY-MM-DD"
+        date2:
+          type: string
+          example: "YYYY-MM-DD"
+    usersArray:
       type: object
       properties:
         users: 
           type: array
           items: 
             $ref: '#/components/schemas/UserData'
-    responseUserDataArray:
-      type: object
-      properties:
-        users: 
-          type: array
-          example: ["a", "b", "c"]
-    addedDate:
+    addShiftsResponse:
       type: object
       properties:
         date: {type: array, example: ["2024-05-01", "2024-05-02"]}
@@ -299,8 +336,8 @@ components:
       type: object
       properties:
         ID: {type: integer, example: 1}
-        UID: {type: string, example: "foo"}
-        Login: {type: string, example: "kakiba"}
+        UID: {type: string, example: "var"}
+        Login: {type: string, example: "foo"}
         Wallet: {type: string, example: "0xA0D9F5854A77D4906906BCEDAAEBB3A39D61165A"}
     Shift:
       type: object
@@ -334,8 +371,8 @@ components:
     UserData:
       type: object
       properties:
-        login: {type: string, example: "kakiba", description: "intra名"}
-        uid: {type: string, example: "foo", description: "intra名に紐づくuid"}
+        login: {type: string, example: "foo", description: "intra名"}
+        uid: {type: string, example: "var", description: "intra名に紐づくuid"}
         wallet: {type: string, example: "0xA0D9F5854A77D4906906BCEDAAEBB3A39D61165A", description: "walletアドレス"}
     RoleData:
       type: object
