@@ -9,6 +9,13 @@ import (
 	"time"
 )
 
+type ExchangeData struct {
+	login1 string `json:"login1"`
+	login2 string `json:"login2"`
+	date1  string `json:"date1"`
+	date2  string `json:"date2"`
+}
+
 // Handle the endpoint that gets the shift.
 func GetShiftData(c *gin.Context) {
 	date, err := getQueryAboutDate(c)
@@ -51,8 +58,35 @@ func getQueryAboutDate(c *gin.Context) (string, error) {
 	if date == "" {
 		date = time.Now().Format("2006-01-02")
 	}
-	if !regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`).MatchString(date) {
+	if !isDateStringValid(date) {
 		return "", errors.New("Invalid date format. It should be in YYYY/MM/DD format")
 	}
 	return date, nil
+}
+
+func isDateStringValid(date string) bool {
+	return regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`).MatchString(date)
+}
+
+func ExchangeShiftData(c *gin.Context) {
+	var e ExchangeData
+	if err := c.BindJSON(&e); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if e.login1 == "" || e.login2 == "" || e.date1 == "" || e.date2 == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "login1, login2, date1, and date2 are required"})
+		return
+	}
+	if !isDateStringValid(e.date1) || !isDateStringValid(e.date2) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format. It should be in YYYY/MM/DD format"})
+		return
+	}
+	if shift1, shift2, err := accessdb.ExchangeShiftsOnDB(e.login1, e.login2, e.date1, e.date2); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"shifts": []accessdb.Shift{shift1, shift2},
+	})
 }
