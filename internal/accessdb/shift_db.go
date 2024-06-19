@@ -2,6 +2,7 @@ package accessdb
 
 import (
 	"gorm.io/gorm"
+	"database/sql"
 )
 
 // Receives the date and returns the shifts for that date.
@@ -114,9 +115,46 @@ func transactionExchange(db *gorm.DB, login1, login2, date1, date2 string) (*Shi
 			return err
 		}
 		return nil
-	})
+	}, &sql.TxOptions{Isolation: sql.LevelSerializable})
 	if err != nil {
 		return nil, nil, err
 	}
 	return &shift1, &shift2, nil
+}
+
+// Receives login and date, deletes the shift, and returns the deleted shift.
+func DeleteShiftFromDB(login, date string) (*Shift, error) {
+	db, err := ConnectToDB()
+	if err != nil {
+		return nil, err
+	}
+	shift, err := transactionDelete(db, login, date)
+	if err != nil {
+		return nil, err
+	}
+	return shift, nil
+}
+
+func transactionDelete(db *gorm.DB, login, date string) (*Shift, error) {
+	var shift Shift
+	err := db.Transaction(func(tx *gorm.DB) error {
+		userId, err := getUserIdFromLogin(tx, login)
+		if err != nil {
+			return err
+		}
+		if err := tx.Where("user_id = ? AND date = ?", userId, date).First(&shift).Error; err != nil {
+			return err
+		}
+		if err := tx.Delete(&shift).Error; err != nil {
+			return err
+		}
+		if err := tx.Preload("User").Unscoped().Where("id = ?", shift.ID).First(&shift).Error; err != nil {
+			return err
+		}
+		return nil
+	}, &sql.TxOptions{Isolation: sql.LevelSerializable})
+	if err != nil {
+		return nil, err
+	}
+	return &shift, nil
 }

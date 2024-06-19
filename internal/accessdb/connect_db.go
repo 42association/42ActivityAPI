@@ -13,6 +13,7 @@ type Shift struct {
 	Date   string
 	UserID int  `json: "user_id"`
 	User   User `gorm:"foreignKey:UserID"`
+	DeletedAt gorm.DeletedAt
 }
 
 type User struct {

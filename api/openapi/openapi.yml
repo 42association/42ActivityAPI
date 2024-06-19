@@ -381,6 +381,7 @@ components:
         UserID: {type: integer, example: 1}
         User:
           $ref: '#/components/schemas/User'
+        DeletedAt: {type: string, example: "2024-06-19T11:55:03.892Z"}
     M5Stick:
       type: object
       properties:

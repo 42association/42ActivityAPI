@@ -36,6 +36,7 @@ func main() {
 	router.GET("/shifts", handlers.GetShiftData)
 	router.POST("/shifts", handlers.AddShiftData)
 	router.POST("/shifts/exchange", handlers.ExchangeShiftData)
+	router.DELETE("/shifts", handlers.DeleteShiftData)
 
 	router.POST("/activities", handlers.AddActivity)
 	router.GET("/activities/cleanings", handlers.GetActivityCleanData)
