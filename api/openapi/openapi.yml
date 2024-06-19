@@ -64,8 +64,8 @@ paths:
             schema:
               $ref: '#/components/schemas/exchangeShiftData'
               required:
-                - user1
-                - user2
+                - login1
+                - login2
                 - date1
                 - date2
       responses:
@@ -291,12 +291,12 @@ components:
     exchangeShiftData:
       type: object
       properties:
-        user1:
+        login1:
           type: string
-          example: "user1"
-        user2:
+          example: "login1"
+        login2:
           type: string
-          example: "user2"
+          example: "login2"
         date1:
           type: string
           example: "YYYY-MM-DD"
