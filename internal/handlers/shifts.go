@@ -16,6 +16,11 @@ type ExchangeData struct {
 	Date2  string `json:"date2"`
 }
 
+type DeleteData struct {
+	Login string `json:"login"`
+	Date  string `json:"date"`
+}
+
 // Handle the endpoint that gets the shift.
 func GetShiftData(c *gin.Context) {
 	date, err := getQueryAboutDate(c)
@@ -90,5 +95,28 @@ func ExchangeShiftData(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"shifts": []*accessdb.Shift{shift1, shift2},
 		})
+	}
+}
+
+// Handle the endpoint that deletes a shift.
+func DeleteShiftData(c *gin.Context) {
+	var d DeleteData
+	if err := c.BindJSON(&d); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if d.Login == "" || d.Date == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "login and date are required"})
+		return
+	}
+	if !isDateStringValid(d.Date) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format. It should be in YYYY/MM/DD format"})
+		return
+	}
+	if shift, err := accessdb.DeleteShiftFromDB(d.Login, d.Date); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	} else {
+		c.JSON(http.StatusOK, shift)
 	}
 }
