@@ -45,7 +45,7 @@ func AddShiftData(c *gin.Context) {
 		return
 	}
 	if date, err := accessdb.AddShiftToDB(schedule); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	} else {
 		c.JSON(http.StatusOK, gin.H{"date": date})
@@ -84,7 +84,7 @@ func ExchangeShiftData(c *gin.Context) {
 		return
 	}
 	if shift1, shift2, err := accessdb.ExchangeShiftsOnDB(e.Login1, e.Login2, e.Date1, e.Date2); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	} else {
 		c.JSON(http.StatusOK, gin.H{
