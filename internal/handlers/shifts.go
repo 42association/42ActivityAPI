@@ -80,7 +80,7 @@ func ExchangeShiftData(c *gin.Context) {
 		return
 	}
 	if !isDateStringValid(e.Date1) || !isDateStringValid(e.Date2) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format. It should be in YYYY/MM/DD format"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format. It should be in YYYY-MM-DD format"})
 		return
 	}
 	if shift1, shift2, err := accessdb.ExchangeShiftsOnDB(e.Login1, e.Login2, e.Date1, e.Date2); err != nil {

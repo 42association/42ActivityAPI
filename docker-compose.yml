@@ -11,6 +11,7 @@ services:
     ports:
       - "${API_PORT}:${API_PORT}"
     networks:
+      - activityapi-network
       - docker-network
     environment:
       DSN: ${DSN}
@@ -29,7 +30,7 @@ services:
     ports:
       - "3306:${MARIA_PORT}"
     networks:
-      - docker-network
+      - activityapi-network
     environment:
       MARIADB_ROOT_PASSWORD: ${MARIA_ROOT_PASS}
       MARIADB_DATABASE: ${MARIA_NAME}
@@ -47,12 +48,14 @@ services:
     ports:
       - 8080:8080
     networks:
-      - docker-network
+      - activityapi-network
     depends_on:
       mariadb:
         condition: service_healthy
 volumes:
   mariadb:
 networks:
-  docker-network:
+  activityapi-network:
     driver: bridge
+  docker-network:
+    external: true
