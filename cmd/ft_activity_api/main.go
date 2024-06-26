@@ -2,6 +2,7 @@ package main
 
 import (
 	"42ActivityAPI/internal/accessdb"
+	"42ActivityAPI/internal/checkauth"
 	"42ActivityAPI/internal/handlers"
 	"42ActivityAPI/internal/loadconfig"
 	"github.com/gin-contrib/cors"
@@ -20,6 +21,9 @@ func main() {
 	}
 
 	router := gin.Default()
+
+	router.Use(checkauth.CheckAuthHeader())
+
 	router.LoadHTMLGlob("web/templates/*")
 
 	// CORS Settings
