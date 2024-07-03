@@ -10,7 +10,7 @@ var Logger *slog.Logger
 
 func GinLogger(logger *slog.Logger) gin.HandlerFunc {
 	return gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
-		Logger.Info("request",
+		Logger.Info("gin-request",
 			slog.String("time", param.TimeStamp.Format(time.RFC3339)),
 			slog.Int("status", param.StatusCode),
 			slog.String("latency", param.Latency.String()),
