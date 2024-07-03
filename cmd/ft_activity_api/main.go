@@ -4,22 +4,39 @@ import (
 	"42ActivityAPI/internal/accessdb"
 	"42ActivityAPI/internal/handlers"
 	"42ActivityAPI/internal/loadconfig"
+	"42ActivityAPI/internal/logging"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
+	"io"
 )
 
 func main() {
+	var file *os.File
+	var err error
+	file, err = os.OpenFile("server.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Println("Failed to open log file: ", err)
+		return
+	}
+	defer file.Close()
+	writter := io.Writer(file)
+	logging.Logger = slog.New(slog.NewJSONHandler(writter, nil))
+	slog.SetDefault(logging.Logger)
+
 	// Initialize database
-	_, err := accessdb.ConnectToDB()
+	_, err = accessdb.ConnectToDB()
 	if err != nil {
 		log.Println("Failed to initialize database: ", err)
 		return
 	}
 
 	router := gin.Default()
+	router.Use(logging.GinLogger(logging.Logger))
+
 	router.LoadHTMLGlob("web/templates/*")
 
 	// CORS Settings
