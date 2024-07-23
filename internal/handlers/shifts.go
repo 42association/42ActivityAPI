@@ -25,13 +25,13 @@ type DeleteData struct {
 func GetShiftData(c *gin.Context) {
 	date, err := getQueryAboutDate(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid query"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request."})
 		return
 	}
 
 	shifts, err := accessdb.GetShiftFromDB(date)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get shift"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error."})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"shifts": shifts})
@@ -42,15 +42,19 @@ func AddShiftData(c *gin.Context) {
 	var schedule []accessdb.Schedule
 
 	if err := c.BindJSON(&schedule); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request."})
 		return
 	}
 	if len(schedule) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Shift is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request."})
 		return
 	}
-	if date, err := accessdb.AddShiftToDB(schedule); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	if date, err, status := accessdb.AddShiftToDB(schedule); err != nil {
+		if status == http.StatusNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Not Found."})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error."})
 		return
 	} else {
 		c.JSON(http.StatusOK, gin.H{"date": date})
@@ -77,19 +81,23 @@ func isDateStringValid(date string) bool {
 func ExchangeShiftData(c *gin.Context) {
 	var e ExchangeData
 	if err := c.BindJSON(&e); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request."})
 		return
 	}
 	if e.Login1 == "" || e.Login2 == "" || e.Date1 == "" || e.Date2 == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "login1, login2, date1, and date2 are required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request."})
 		return
 	}
 	if !isDateStringValid(e.Date1) || !isDateStringValid(e.Date2) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format. It should be in YYYY-MM-DD format"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request."})
 		return
 	}
-	if shift1, shift2, err := accessdb.ExchangeShiftsOnDB(e.Login1, e.Login2, e.Date1, e.Date2); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	if shift1, shift2, err, status := accessdb.ExchangeShiftsOnDB(e.Login1, e.Login2, e.Date1, e.Date2); err != nil {
+		if status == http.StatusNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Not Found."})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error."})
 		return
 	} else {
 		c.JSON(http.StatusOK, gin.H{
@@ -102,19 +110,23 @@ func ExchangeShiftData(c *gin.Context) {
 func DeleteShiftData(c *gin.Context) {
 	var d DeleteData
 	if err := c.BindJSON(&d); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request."})
 		return
 	}
 	if d.Login == "" || d.Date == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "login and date are required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request."})
 		return
 	}
 	if !isDateStringValid(d.Date) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format. It should be in YYYY/MM/DD format"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request."})
 		return
 	}
-	if shift, err := accessdb.DeleteShiftFromDB(d.Login, d.Date); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if shift, err, status := accessdb.DeleteShiftFromDB(d.Login, d.Date); err != nil {
+		if status == http.StatusNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Not Found."})
+			return
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request."})
 		return
 	} else {
 		c.JSON(http.StatusOK, shift)

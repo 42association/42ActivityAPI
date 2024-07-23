@@ -3,6 +3,7 @@ package accessdb
 import (
 	"gorm.io/gorm"
 	"database/sql"
+	"errors"
 )
 
 // Receives the date and returns the shifts for that date.
@@ -22,10 +23,10 @@ func GetShiftFromDB(date string) ([]Shift, error) {
 Receives an array of shifts, adds a shift that does not exist in the DB,
 and returns an array of added dates.
 */
-func AddShiftToDB(schedule []Schedule) ([]string, error) {
+func AddShiftToDB(schedule []Schedule) ([]string, error, int) {
 	db, err := ConnectToDB()
 	if err != nil {
-		return nil, err
+		return nil, err, 500
 	}
 
 	var addedDate []string
@@ -37,18 +38,18 @@ func AddShiftToDB(schedule []Schedule) ([]string, error) {
 		}
 		flag = false
 		for _, l := range s.Login {
-			userId, err := getUserIdFromLogin(db, l)
+			userId, err, status := getUserIdFromLogin(db, l)
 			if err != nil {
-				return nil, err
+				return nil, err, status
 			}
 			var shift Shift
 			if err := db.Where("user_id = ? AND date = ?", userId, s.Date).First(&shift).Error; err != nil {
 				if err != gorm.ErrRecordNotFound {
-					return nil, err
+					return nil, err, 500
 				}
 				shift = Shift{Date: s.Date, UserID: userId}
 				if result := db.Create(&shift); result.Error != nil {
-					return nil, result.Error
+					return nil, result.Error, 500
 				}
 				flag = true
 			} else {
@@ -59,41 +60,50 @@ func AddShiftToDB(schedule []Schedule) ([]string, error) {
 			addedDate = append(addedDate, s.Date)
 		}
 	}
-	return addedDate, nil
+	return addedDate, nil, 200
 }
 
 // Receive the login and *gorm.DB, and return the user ID.
-func getUserIdFromLogin(db *gorm.DB, login string) (int, error) {
+func getUserIdFromLogin(db *gorm.DB, login string) (int, error, int) {
 	var user User
 	if err := db.Where("login = ?", login).First(&user).Error; err != nil {
-		return 0, err
+		if err == gorm.ErrRecordNotFound {
+			return 0, err, 404
+		}
+		return 0, err, 500
 	}
-	return user.ID, nil
+	return user.ID, nil, 200
 }
 
 // Receives login and date, exchanges the shift, and returns the exchanged shift.
-func ExchangeShiftsOnDB(login1, login2, date1, date2 string) (*Shift, *Shift, error) {
+func ExchangeShiftsOnDB(login1, login2, date1, date2 string) (*Shift, *Shift, error, int) {
 	db, err := ConnectToDB()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, err, 500
 	}
-	shift1, shift2, err := transactionExchange(db, login1, login2, date1, date2)
+	shift1, shift2, err, status := transactionExchange(db, login1, login2, date1, date2)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, err, status
 	}
-	return shift1, shift2, nil
+	return shift1, shift2, nil, 200
 }
 
-func transactionExchange(db *gorm.DB, login1, login2, date1, date2 string) (*Shift, *Shift, error) {
+func transactionExchange(db *gorm.DB, login1, login2, date1, date2 string) (*Shift, *Shift, error, int) {
 	var shift1, shift2 Shift
 	
 	err := db.Transaction(func(tx *gorm.DB) error {
-		userId1, err := getUserIdFromLogin(tx, login1)
+		userId1, err, status := getUserIdFromLogin(tx, login1)
 		if err != nil {
+			if status == 404 {
+				return gorm.ErrRecordNotFound
+			}
 			return err
 		}
-		userId2, err := getUserIdFromLogin(tx, login2)
+		userId2, err, status := getUserIdFromLogin(tx, login2)
 		if err != nil {
+			if status == 404 {
+				return gorm.ErrRecordNotFound
+			}
 			return err
 		}
 		if err := tx.Where("user_id = ? AND date = ?", userId1, date1).First(&shift1).Error; err != nil {
@@ -117,29 +127,35 @@ func transactionExchange(db *gorm.DB, login1, login2, date1, date2 string) (*Shi
 		return nil
 	}, &sql.TxOptions{Isolation: sql.LevelSerializable})
 	if err != nil {
-		return nil, nil, err
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil, err, 404
+		}
+		return nil, nil, err, 500
 	}
-	return &shift1, &shift2, nil
+	return &shift1, &shift2, nil, 200
 }
 
 // Receives login and date, deletes the shift, and returns the deleted shift.
-func DeleteShiftFromDB(login, date string) (*Shift, error) {
+func DeleteShiftFromDB(login, date string) (*Shift, error, int) {
 	db, err := ConnectToDB()
 	if err != nil {
-		return nil, err
+		return nil, err, 500
 	}
-	shift, err := transactionDelete(db, login, date)
+	shift, err, status := transactionDelete(db, login, date)
 	if err != nil {
-		return nil, err
+		return nil, err, status
 	}
-	return shift, nil
+	return shift, nil, 200
 }
 
-func transactionDelete(db *gorm.DB, login, date string) (*Shift, error) {
+func transactionDelete(db *gorm.DB, login, date string) (*Shift, error, int) {
 	var shift Shift
 	err := db.Transaction(func(tx *gorm.DB) error {
-		userId, err := getUserIdFromLogin(tx, login)
+		userId, err, status := getUserIdFromLogin(tx, login)
 		if err != nil {
+			if status == 404 {
+				return gorm.ErrRecordNotFound
+			}
 			return err
 		}
 		if err := tx.Where("user_id = ? AND date = ?", userId, date).First(&shift).Error; err != nil {
@@ -154,7 +170,10 @@ func transactionDelete(db *gorm.DB, login, date string) (*Shift, error) {
 		return nil
 	}, &sql.TxOptions{Isolation: sql.LevelSerializable})
 	if err != nil {
-		return nil, err
+		if err == gorm.ErrRecordNotFound {
+			return nil, err, 404
+		}
+		return nil, err, 500
 	}
-	return &shift, nil
+	return &shift, nil, 200
 }
