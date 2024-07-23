@@ -6,11 +6,11 @@ import (
 	"42ActivityAPI/internal/loadconfig"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 	"log"
 	"net/http"
 	"os"
-	"github.com/swaggo/files"
-    "github.com/swaggo/gin-swagger"
 )
 
 func main() {
