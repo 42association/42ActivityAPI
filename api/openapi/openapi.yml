@@ -8,6 +8,8 @@ servers:
 paths:
   /shifts:
     get:
+      tags:
+        - シフト管理
       summary: "シフトの取得"
       description: |
         ## 概要
@@ -25,20 +27,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/shiftsArray'
+                $ref: './openapi.yml#/components/schemas/shiftsArray'
         '400':
           description: ""
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error400'
+                $ref: './openapi.yml#/components/schemas/Error400'
         '500':
           description: ""
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error500'
+                $ref: './openapi.yml#/components/schemas/Error500'
     post:
+      tags:
+        - シフト管理
       summary: "シフトの追加"
       description: |
         ## 概要
@@ -48,7 +52,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/addShiftsRequestBody'
+              $ref: './openapi.yml#/components/schemas/addShiftsRequestBody'
               required:
                 - shift
       responses:
@@ -57,26 +61,28 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/addShiftsResponse'
+                $ref: './openapi.yml#/components/schemas/addShiftsResponse'
         '400':
           description: ""
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error400'
+                $ref: './openapi.yml#/components/schemas/Error400'
         '404':
           description: ""
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error404'
+                $ref: './openapi.yml#/components/schemas/Error404'
         '500':
           description: ""
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error500'
+                $ref: './openapi.yml#/components/schemas/Error500'
     delete:
+      tags:
+        - シフト管理
       summary: "シフトの削除"
       description: |
         ## 概要
@@ -86,7 +92,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/deleteShiftsRequestBody'
+              $ref: './openapi.yml#/components/schemas/deleteShiftsRequestBody'
               required:
                 - login
                 - date
@@ -96,27 +102,29 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Shift'
+                $ref: './openapi.yml#/components/schemas/Shift'
         '400':
           description: ""
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error400'
+                $ref: './openapi.yml#/components/schemas/Error400'
         '404':
           description: ""
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error404'
+                $ref: './openapi.yml#/components/schemas/Error404'
         '500':
           description: ""
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error500'
+                $ref: './openapi.yml#/components/schemas/Error500'
   /shifts/exchange:
     post:
+      tags:
+        - シフト管理
       summary: "シフトの交換"
       description: |
         ## 概要
@@ -126,7 +134,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/exchangeShiftsRequestBody'
+              $ref: './openapi.yml#/components/schemas/exchangeShiftsRequestBody'
               required:
                 - login1
                 - login2
@@ -138,27 +146,29 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/shiftsArray'
+                $ref: './openapi.yml#/components/schemas/shiftsArray'
         '400':
           description: ""
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error400'
+                $ref: './openapi.yml#/components/schemas/Error400'
         '404':
           description: ""
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error404'
+                $ref: './openapi.yml#/components/schemas/Error404'
         '500':
           description: ""
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error500'
+                $ref: './openapi.yml#/components/schemas/Error500'
   /users:
     post:
+      tags:
+        - ユーザ管理
       summary: "ユーザの追加"
       description: "任意人数のlogin, uid, walletをDBに追加します"
       requestBody:
@@ -166,7 +176,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/usersArray'
+              $ref: './openapi.yml#/components/schemas/usersArray'
               required:
                 - users
       responses:
@@ -175,7 +185,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/usersArray'
+                $ref: './openapi.yml#/components/schemas/usersArray'
         '400':
           description: "失敗。エラーメッセージと追加に成功したuserの配列をjsonで返します"
           content:
@@ -186,6 +196,8 @@ paths:
                   error: {type: string, example: "Error message"}
                   users: {type: array, example: ["a", "b", "c"]}
     put:
+      tags:
+        - ユーザ管理
       summary: "ユーザの編集"
       description: "intra名に紐づくuidやwalletアドレスを更新します"
       requestBody:
@@ -193,7 +205,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserData'
+              $ref: './openapi.yml#/components/schemas/UserData'
               required:
                 - login
       responses:
@@ -202,22 +214,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserData'
+                $ref: './openapi.yml#/components/schemas/UserData'
         '400':
           description: "失敗。エラーメッセージをjsonで返します"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: './openapi.yml#/components/schemas/Error'
   /activities:
     post:
+      tags:
+        - アクティビティ管理
       summary: "アクティビティの追加"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ActivityData'
+              $ref: './openapi.yml#/components/schemas/ActivityData'
               required:
                 - mac
                 - uid
@@ -227,15 +241,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ActivityData'
+                $ref: './openapi.yml#/components/schemas/ActivityData'
         '400':
           description: "失敗。エラーメッセージをjsonで返します"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: './openapi.yml#/components/schemas/Error'
   /activities/cleanings:
     get:
+      tags:
+        - アクティビティ管理
       summary: "掃除データの取得"
       description: "指定した期間でrole(cleaning)に紐づくデータを返します"
       parameters:
@@ -255,22 +271,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cleaningsData'
+                $ref: './openapi.yml#/components/schemas/cleaningsData'
         '400':
           description: "失敗。エラーメッセージをjsonで返します"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: './openapi.yml#/components/schemas/Error'
   /roles:
     post:
+      tags:
+        - ロール管理
       summary: "ロールの追加"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RoleData'
+              $ref: './openapi.yml#/components/schemas/RoleData'
               required:
                 - name
       responses:
@@ -279,22 +297,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RoleData'
+                $ref: './openapi.yml#/components/schemas/RoleData'
         '400':
           description: "失敗。エラーメッセージをjsonで返します"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: './openapi.yml#/components/schemas/Error'
   /locations:
     post:
+      tags:
+        - ロケーション管理
       summary: "場所の追加"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LocationData'
+              $ref: './openapi.yml#/components/schemas/LocationData'
               required:
                 - name
       responses:
@@ -303,22 +323,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LocationData'
+                $ref: './openapi.yml#/components/schemas/LocationData'
         '400':
           description: "失敗。エラーメッセージをjsonで返します"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: './openapi.yml#/components/schemas/Error'
   /m5sticks:
     post:
+      tags:
+        - M5Stick端末管理
       summary: "M5Stickの追加"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/M5StickData'
+              $ref: './openapi.yml#/components/schemas/M5StickData'
               required:
                 - mac
                 - role
@@ -329,13 +351,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/M5StickData'
+                $ref: './openapi.yml#/components/schemas/M5StickData'
         '400':
           description: "失敗。エラーメッセージをjsonで返します"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: './openapi.yml#/components/schemas/Error'
 components:
   schemas:
     shiftsArray:
@@ -344,7 +366,7 @@ components:
         type: object
         properties:
             shifts:
-              $ref: '#/components/schemas/Shift'
+              $ref: './openapi.yml#/components/schemas/Shift'
     addShiftsRequestBody:
       type: array
       items:
@@ -394,7 +416,7 @@ components:
         users: 
           type: array
           items: 
-            $ref: '#/components/schemas/UserData'
+            $ref: './openapi.yml#/components/schemas/UserData'
     addShiftsResponse:
       type: object
       properties:
@@ -412,10 +434,10 @@ components:
           ID: {type: integer, example: 1}
           UserID: {type: integer, example: 1}
           User:
-            $ref: '#/components/schemas/User'
+            $ref: './openapi.yml#/components/schemas/User'
           M5StickID: {type: integer, example: 1}
           M5Stick:
-            $ref: '#/components/schemas/M5Stick'
+            $ref: './openapi.yml#/components/schemas/M5Stick'
           CreatedAt: {type: integer, example: 1712666900}
     User:
       type: object
@@ -431,7 +453,7 @@ components:
         Date: {type: string, example: "2024-05-01"}
         UserID: {type: integer, example: 1}
         User:
-          $ref: '#/components/schemas/User'
+          $ref: './openapi.yml#/components/schemas/User'
         DeletedAt: {type: string, example: "2024-06-19T11:55:03.892Z"}
     M5Stick:
       type: object
@@ -440,10 +462,10 @@ components:
         Mac: {type: string, example: "00:00:00:00:00:00"}
         RoleId: {type: integer, example: 1}
         Role:
-          $ref: '#/components/schemas/Role'
+          $ref: './openapi.yml#/components/schemas/Role'
         LocationId: {type: integer, example: 1}
         Location:
-          $ref: '#/components/schemas/Location'
+          $ref: './openapi.yml#/components/schemas/Location'
     Role:
       type: object
       properties:

@@ -9,6 +9,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"github.com/swaggo/files"
+    "github.com/swaggo/gin-swagger"
 )
 
 func main() {
@@ -26,6 +28,14 @@ func main() {
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"*"}
 	router.Use(cors.New(config))
+
+	router.StaticFile("/openapi.yml", "./api/openapi/openapi.yml")
+	router.GET("/apidoc/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, func(c *ginSwagger.Config) {
+		c.URL = "/openapi.yml"
+	}))
+	router.GET("/apidoc", func(c *gin.Context) {
+		c.Redirect(302, "/apidoc/index.html")
+	})
 
 	router.GET("/", ShowIndexPage)
 	router.GET("/new", RedirectToIndexWithUID)

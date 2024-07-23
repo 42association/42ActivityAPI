@@ -3,7 +3,6 @@ package accessdb
 import (
 	"gorm.io/gorm"
 	"database/sql"
-	"errors"
 )
 
 // Receives the date and returns the shifts for that date.
