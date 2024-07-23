@@ -9,7 +9,10 @@ paths:
   /shifts:
     get:
       summary: "シフトの取得"
-      description: "特定の日付のシフトを担当するUserの配列を返します"
+      description: |
+        ## 概要
+        指定した日付のシフトを担当するUserの配列を返却する  
+        指定した日付にシフトが存在しない場合は空の配列を返却する
       parameters:
         - name: date
           in: query
@@ -18,20 +21,28 @@ paths:
           schema: {type: string, example: "2024-05-01"}
       responses:
         '200':
-          description: "成功。Userの配列をjsonで返します"
+          description: ""
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/shiftsArray'
         '400':
-          description: "失敗。エラーメッセージをjsonで返します"
+          description: ""
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/Error400'
+        '500':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
     post:
       summary: "シフトの追加"
-      description: "日付とそれに対応した複数loginをDBに反映する"
+      description: |
+        ## 概要
+        日付とそれに対応した複数loginで構成されるシフト配列をDBに反映する
       requestBody:
         required: true
         content:
@@ -42,20 +53,34 @@ paths:
                 - shift
       responses:
         '200':
-          description: "成功。追加した日付一覧をjsonで返します"
+          description: "追加した日付の配列を返却する"
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/addShiftsResponse'
         '400':
-          description: "失敗。エラーメッセージをjsonで返します"
+          description: ""
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/Error400'
+        '404':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404'
+        '500':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
     delete:
       summary: "シフトの削除"
-      description: "特定の日付とそれに対応したloginのシフトを論理削除します。"
+      description: |
+        ## 概要
+        "日付とそれに対応したloginのシフトを論理削除する"
       requestBody:
         required: true
         content:
@@ -67,21 +92,35 @@ paths:
                 - date
       responses:
         '200':
-          description: "成功。削除したシフトをjsonで返します"
+          description: "削除したシフトを返却する"
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Shift'
         '400':
-          description: "失敗。エラーメッセージをjsonで返します"
+          description: ""
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/Error400'
+        '404':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404'
+        '500':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
   /shifts/exchange:
     post:
       summary: "シフトの交換"
-      description: "特定のシフトの担当者を交換します"
+      description: |
+        ## 概要
+        特定のシフトの担当者を交換する
       requestBody:
         required: true
         content:
@@ -95,17 +134,29 @@ paths:
                 - date2
       responses:
         '200':
-          description: "成功。交換後のシフトの配列を返します"
+          description: "交換後の交換対象者のシフトを返却する"
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/shiftsArray'
         '400':
-          description: "失敗。エラーメッセージをjsonで返します"
+          description: ""
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/Error400'
+        '404':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404'
+        '500':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
   /users:
     post:
       summary: "ユーザの追加"
@@ -427,3 +478,15 @@ components:
       type: object
       properties:
         error: {type: string, example: "Error message"}
+    Error400:
+      type: object
+      properties:
+        error: {type: string, example: "Bad Request."}
+    Error404:
+      type: object
+      properties:
+        error: {type: string, example: "Not Found."}
+    Error500:
+      type: object
+      properties:
+        error: {type: string, example: "Internal Server Error."}
