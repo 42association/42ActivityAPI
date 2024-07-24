@@ -360,7 +360,7 @@ paths:
                 - name
       responses:
         '200':
-          description: ""
+          description: "追加したroleを返却する"
           content:
             application/json:
               schema:
@@ -382,6 +382,9 @@ paths:
       tags:
         - ロケーション管理
       summary: "場所の追加"
+      description: |
+        ## 概要
+        M5Stickの設置場所を追加する
       requestBody:
         required: true
         content:
@@ -392,17 +395,23 @@ paths:
                 - name
       responses:
         '200':
-          description: "成功。追加した場所をjsonで返します"
+          description: "追加した設置場所を返却する"
           content:
             application/json:
               schema:
                 $ref: './openapi.yml#/components/schemas/LocationData'
-        '400':
-          description: "失敗。エラーメッセージをjsonで返します"
+        '409':
+          description: ""
           content:
             application/json:
               schema:
-                $ref: './openapi.yml#/components/schemas/Error'
+                $ref: './openapi.yml#/components/schemas/Error409'
+        '500':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: './openapi.yml#/components/schemas/Error500'
   /m5sticks:
     post:
       tags:
