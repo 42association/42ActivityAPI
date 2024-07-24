@@ -10,10 +10,10 @@ import (
 Receives start_time, end_time, and role, and returns activities that were created between start_time,
 and end_time and have a matching M5stick role.
 */
-func GetActivitiesFromDB(start_time int64, end_time int64, role string) ([]Activity, error) {
+func GetActivitiesFromDB(start_time int64, end_time int64, role string) ([]Activity, error, int) {
 	db, err := ConnectToDB()
 	if err != nil {
-		return nil, err
+		return nil, err, 500
 	}
 	var activities []Activity
 	err = db.
@@ -23,9 +23,12 @@ func GetActivitiesFromDB(start_time int64, end_time int64, role string) ([]Activ
 		Where("roles.name = ?", role).
 		Find(&activities).Error
 	if err != nil {
-		return nil, err
+		if err == gorm.ErrRecordNotFound {
+			return nil, err, 404
+		}
+		return nil, err, 500
 	}
-	return activities, nil
+	return activities, nil, 200
 }
 
 // Receive the uid and MAC address, and add a new activity.

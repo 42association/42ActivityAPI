@@ -86,7 +86,7 @@ paths:
       summary: "シフトの削除"
       description: |
         ## 概要
-        "日付とそれに対応したloginのシフトを論理削除する"
+        日付とそれに対応したloginのシフトを論理削除する
       requestBody:
         required: true
         content:
@@ -174,8 +174,8 @@ paths:
         ## 概要
         複数人のユーザの追加/更新を行う
         ## 注意点
-        - 処理中にエラーが発生した場合、ロールバックは行われない
-        - DBにすでに存在し、情報の更新がないユーザはスキップされる
+        処理中にエラーが発生した場合、ロールバックは行われない  
+        DBにすでに存在し、情報の更新がないユーザはスキップされる
       requestBody:
         required: true
         content:
@@ -252,8 +252,15 @@ paths:
       tags:
         - アクティビティ管理
       summary: "アクティビティの追加"
+      description: |
+        ## 概要
+        42学生のアクティビティ(掃除など)を追加する  
+        主にNFCタグを読み取った際にM5Stickが実行する
       requestBody:
         required: true
+        description: |
+          mac: M5Stickのmacアドレス  
+          uid: 42学生を識別するuid
         content:
           application/json:
             schema:
@@ -263,52 +270,86 @@ paths:
                 - uid
       responses:
         '200':
-          description: "成功。uidとmacをjsonで返します"
+          description: "使用したuidとmacアドレスを返却する"
           content:
             application/json:
               schema:
                 $ref: './openapi.yml#/components/schemas/ActivityData'
         '400':
-          description: "失敗。エラーメッセージをjsonで返します"
+          description: ""
           content:
             application/json:
               schema:
-                $ref: './openapi.yml#/components/schemas/Error'
+                $ref: './openapi.yml#/components/schemas/Error400'
+        '404':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: './openapi.yml#/components/schemas/Error404'
+        '500':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: './openapi.yml#/components/schemas/Error500'
   /activities/cleanings:
     get:
       tags:
         - アクティビティ管理
-      summary: "掃除データの取得"
-      description: "指定した期間でrole(cleaning)に紐づくデータを返します"
+      summary: "掃除アクティビティの取得"
+      description: |
+        ## 概要
+        指定した期間で、M5Stickのroleがcleaningのアクティビティを返却する  
+        期間の指定を行わない場合、現在の日付の午前0時から24時間分のデータを返却する
       parameters:
         - name: start
           in: query
           required: false
-          description: "絞り込む期間の開始時刻(Unix秒)、未指定の場合は現在の日付の午前0時"
+          description: |
+            絞り込む期間の開始時刻(Unix秒)  
+            未指定の場合は現在の日付の午前0時に設定される
           schema: {type: string, example: '1711966578', default: '1711897200'}
         - name: end
           in: query
           required: false
-          description: "絞り込む期間の終了時刻(Unix秒)、未指定の場合はstart+24時間"
+          description: |
+            絞り込む期間の終了時刻(Unix秒)  
+            未指定の場合はstart+24時間に設定される
           schema: {type: string, example: '1713176178', default: '1711983600'}
       responses:
         '200':
-          description: "成功。掃除データをjsonで返します"
+          description: ""
           content:
             application/json:
               schema:
                 $ref: './openapi.yml#/components/schemas/cleaningsData'
         '400':
-          description: "失敗。エラーメッセージをjsonで返します"
+          description: ""
           content:
             application/json:
               schema:
-                $ref: './openapi.yml#/components/schemas/Error'
+                $ref: './openapi.yml#/components/schemas/Error400'
+        '404':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: './openapi.yml#/components/schemas/Error404'
+        '500':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: './openapi.yml#/components/schemas/Error500'
   /roles:
     post:
       tags:
         - ロール管理
       summary: "ロールの追加"
+      description: |
+        ## 概要
+        M5Stickの役割を識別するroleを追加する
       requestBody:
         required: true
         content:
@@ -319,17 +360,23 @@ paths:
                 - name
       responses:
         '200':
-          description: "成功。追加したロールをjsonで返します"
+          description: ""
           content:
             application/json:
               schema:
                 $ref: './openapi.yml#/components/schemas/RoleData'
-        '400':
-          description: "失敗。エラーメッセージをjsonで返します"
+        '409':
+          description: ""
           content:
             application/json:
               schema:
-                $ref: './openapi.yml#/components/schemas/Error'
+                $ref: './openapi.yml#/components/schemas/Error409'
+        '500':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: './openapi.yml#/components/schemas/Error500'
   /locations:
     post:
       tags:
@@ -534,6 +581,10 @@ components:
       type: object
       properties:
         error: {type: string, example: "Not Found."}
+    Error409:
+      type: object
+      properties:
+        error: {type: string, example: "Conflict."}
     Error500:
       type: object
       properties:
