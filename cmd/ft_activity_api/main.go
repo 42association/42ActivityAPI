@@ -29,8 +29,11 @@ func main() {
 	config.AllowOrigins = []string{"*"}
 	router.Use(cors.New(config))
 
+	// Swagger-ui settings
 	router.StaticFile("/openapi.yml", "./api/openapi/openapi.yml")
-	router.GET("/apidoc/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, func(c *ginSwagger.Config) {
+	router.GET("/apidoc/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, 
+		ginSwagger.DefaultModelsExpandDepth(-1), 
+		func(c *ginSwagger.Config) {
 		c.URL = "/openapi.yml"
 	}))
 	router.GET("/apidoc", func(c *gin.Context) {
