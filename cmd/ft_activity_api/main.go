@@ -6,6 +6,8 @@ import (
 	"42ActivityAPI/internal/loadconfig"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 	"log"
 	"net/http"
 	"os"
@@ -26,6 +28,17 @@ func main() {
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"*"}
 	router.Use(cors.New(config))
+
+	// Swagger-ui settings
+	router.StaticFile("/openapi.yml", "./api/openapi/openapi.yml")
+	router.GET("/apidoc/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, 
+		ginSwagger.DefaultModelsExpandDepth(-1), 
+		func(c *ginSwagger.Config) {
+		c.URL = "/openapi.yml"
+	}))
+	router.GET("/apidoc", func(c *gin.Context) {
+		c.Redirect(302, "/apidoc/index.html")
+	})
 
 	router.GET("/", ShowIndexPage)
 	router.GET("/new", RedirectToIndexWithUID)

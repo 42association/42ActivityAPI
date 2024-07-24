@@ -18,13 +18,17 @@ type ActivityRequestData struct {
 func GetActivityCleanData(c *gin.Context) {
 	start_time, end_time, err := GetQueryAboutTime(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid query"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request."})
 		return
 	}
 
-	Activities, err := accessdb.GetActivitiesFromDB(start_time, end_time, "cleaning")
+	Activities, err, status := accessdb.GetActivitiesFromDB(start_time, end_time, "cleaning")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get activities"})
+		if status == http.StatusNotFound {
+			c.JSON(status, gin.H{"error": "Not Found."})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error."})
 		return
 	}
 	c.JSON(http.StatusOK, Activities)
@@ -35,22 +39,26 @@ func AddActivity(c *gin.Context) {
 	var requestData ActivityRequestData
 
 	if err := c.BindJSON(&requestData); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request."})
 		return
 	}
 
 	if requestData.Mac == "" || requestData.Uid == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "All parameters are required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request."})
 		return
 	}
 
 	status, uid, mac, err := accessdb.AddActivityToDB(requestData.Uid, requestData.Mac)
 	if err != nil {
-		c.JSON(status, gin.H{"error": err.Error()})
+		if status == http.StatusNotFound {
+			c.JSON(status, gin.H{"error": "Not Found."})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error."})
 		return
 	}
 
-	c.JSON(status, gin.H{"uid": uid, "mac": mac})
+	c.JSON(http.StatusOK, gin.H{"uid": uid, "mac": mac})
 	return
 }
 
