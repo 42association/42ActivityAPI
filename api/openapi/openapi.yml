@@ -170,7 +170,12 @@ paths:
       tags:
         - ユーザ管理
       summary: "ユーザの追加"
-      description: "任意人数のlogin, uid, walletをDBに追加します"
+      description: |
+        ## 概要
+        複数人のユーザの追加/更新を行う
+        ## 注意点
+        - 処理中にエラーが発生した場合、ロールバックは行われない
+        - DBにすでに存在し、情報の更新がないユーザはスキップされる
       requestBody:
         required: true
         content:
@@ -181,25 +186,34 @@ paths:
                 - users
       responses:
         '200':
-          description: "成功。追加したuserの配列をjsonで返します"
+          description: "追加/更新したuserの配列を返却する"
           content:
             application/json:
               schema:
                 $ref: './openapi.yml#/components/schemas/usersArray'
         '400':
-          description: "失敗。エラーメッセージと追加に成功したuserの配列をjsonで返します"
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: './openapi.yml#/components/schemas/Error400'
+        '500':
+          description: |
+            エラーメッセージと追加/更新に成功したuserの配列を返却する
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error: {type: string, example: "Error message"}
+                  error: {type: string, example: "Internal Server Error."}
                   users: {type: array, example: ["a", "b", "c"]}
     put:
       tags:
         - ユーザ管理
       summary: "ユーザの編集"
-      description: "intra名に紐づくuidやwalletアドレスを更新します"
+      description: |
+        ## 概要
+        intra名に紐づくuidとwalletアドレスを更新する
       requestBody:
         required: true
         content:
@@ -210,17 +224,29 @@ paths:
                 - login
       responses:
         '200':
-          description: "成功。更新したユーザをjsonで返します"
+          description: ""
           content:
             application/json:
               schema:
                 $ref: './openapi.yml#/components/schemas/UserData'
         '400':
-          description: "失敗。エラーメッセージをjsonで返します"
+          description: ""
           content:
             application/json:
               schema:
-                $ref: './openapi.yml#/components/schemas/Error'
+                $ref: './openapi.yml#/components/schemas/Error400'
+        '404':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: './openapi.yml#/components/schemas/Error404'
+        '500':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: './openapi.yml#/components/schemas/Error500'
   /activities:
     post:
       tags:

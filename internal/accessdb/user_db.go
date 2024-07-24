@@ -41,23 +41,27 @@ func AddUsersToDB(users []UserRequestData) ([]string, error) {
 }
 
 // Receive uid, login, and wallet, and if the same login exists in the DB, update the user data.
-func EditUserInDB(uid string, login string, wallet string) error {
+func EditUserInDB(uid string, login string, wallet string) (error, int) {
 	db, err := ConnectToDB()
 	if err != nil {
-		return err
+		return err, 500
 	}
 
 	var existingUser User
 	if err := db.Where("login = ?", login).First(&existingUser).Error; err != nil {
-		return err
+		if err == gorm.ErrRecordNotFound {
+			return errors.New("User not found"), 404
+		}
+		return err, 500
 	}
 
 	if result := db.Model(&existingUser).Updates(User{UID: uid, Wallet: wallet}); result.Error != nil {
-		return result.Error
+		return result.Error, 500
 	}
-	return nil
+	return nil, 200
 }
 
+// 
 // Receives uid, login, and wallet, and if the same login does not exist in the DB, adds a new user.
 func AddUserToDB(uid string, login string, wallet string) error {
 	db, err := ConnectToDB()

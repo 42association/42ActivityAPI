@@ -11,15 +11,15 @@ func AddUsers(c *gin.Context) {
 	var requestData accessdb.Users
 
 	if err := c.BindJSON(&requestData); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request."})
 		return
 	}
 	if len(requestData.Users) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User is not specified"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request."})
 		return
 	}
 	if addedLogin, err := accessdb.AddUsersToDB(requestData.Users); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "users": addedLogin})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error.", "users": addedLogin})
 		return
 	} else {
 		c.JSON(http.StatusOK, gin.H{"users": addedLogin})
@@ -32,15 +32,19 @@ func EditUser(c *gin.Context) {
 	var requestData accessdb.UserRequestData
 
 	if err := c.BindJSON(&requestData); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request."})
 		return
 	}
 	if requestData.Login == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Login is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request."})
 		return
 	}
-	if err := accessdb.EditUserInDB(requestData.Uid, requestData.Login, requestData.Wallet); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err, status := accessdb.EditUserInDB(requestData.Uid, requestData.Login, requestData.Wallet); err != nil {
+		if status == 404 {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Not Found."})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error."})
 		return
 	}
 	response := make(gin.H)
