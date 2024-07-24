@@ -417,6 +417,9 @@ paths:
       tags:
         - M5Stick端末管理
       summary: "M5Stickの追加"
+      description: |
+        ## 概要
+        M5Stickのmacアドレス、role、locationを追加する
       requestBody:
         required: true
         content:
@@ -429,17 +432,35 @@ paths:
                 - location
       responses:
         '200':
-          description: "成功。追加したM5Stickをjsonで返します"
+          description: "追加したM5Stickのデータを返却する"
           content:
             application/json:
               schema:
                 $ref: './openapi.yml#/components/schemas/M5StickData'
         '400':
-          description: "失敗。エラーメッセージをjsonで返します"
+          description: ""
           content:
             application/json:
               schema:
-                $ref: './openapi.yml#/components/schemas/Error'
+                $ref: './openapi.yml#/components/schemas/Error400'
+        '404':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: './openapi.yml#/components/schemas/Error404'
+        '409':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: './openapi.yml#/components/schemas/Error409'
+        '500':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: './openapi.yml#/components/schemas/Error500'
 components:
   schemas:
     shiftsArray:
@@ -578,10 +599,6 @@ components:
         mac: {type: string, example: "00:00:00:00:00:00"}
         role: {type: string, example: "Cleaning"}
         location: {type: string, example: "F1"}
-    Error:
-      type: object
-      properties:
-        error: {type: string, example: "Error message"}
     Error400:
       type: object
       properties:
