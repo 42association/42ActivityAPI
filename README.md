@@ -25,7 +25,7 @@ This API requires Go, docker, and the 42API UID and secret.
 
 ## Usage
 
-After executing the API, access the /apidoc endpoint.
+[openapi.yml](./api/openapi/openapi.yml)
 
 ## Contribution
 
