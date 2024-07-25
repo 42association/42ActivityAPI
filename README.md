@@ -1,63 +1,32 @@
-# Go Web Application
+# 42ActivityAPI
 
-このプロジェクトは、Gin Webフレームワークを使用したGo言語によるWebアプリケーションです。認証フローを実装しており、ユーザーが42 APIを通じて自身のデータを取得できるようにします。
+This repository contains APIs written in Go language that are provided to a system aimed at streamlining 42Tokyo's operations and visualizing student contributions.
 
-## 始め方
+## Overview
+- Endpoints involved in school cleaning shift management.
+- Endpoints involved in managing users.
+- Endpoints involved in recording student contributions.
+- Endpoints involved in managing NFC readers.
 
-このプロジェクトを使用するには、以下の手順に従ってください。
+## Getting started
+This API requires Go, docker, and the 42API UID and secret.
 
-### 必要条件
-
-- Go言語がインストールされていること
-- `git` がインストールされていること
-- 42 APIへのアクセスと、クライアントID (`UID`) とクライアントシークレット (`SECRET`) を取得していること
-
-### インストール方法
-
-1. リポジトリをクローンします。
-
-   ```bash
-   git clone https://github.com/your-username/your-project-name.git
-   cd your-project-name
+1. Clone the repository.
+   ```
+   git clone https://github.com/42association/42ActivityAPI.git
+   cd 42ActivityAPI
    ```
 
-2. `.env` ファイルをプロジェクトのルートに作成し、以下の環境変数を設定します。
-
+2. Write environment variables to `.env`.
+3. Execute the API.
    ```
-   UID=your_42_api_client_id
-   SECRET=your_42_api_client_secret
-   CALLBACK_URL=your_callback_url
+   make up
    ```
 
-3. 依存関係をインストールします。
+## Usage
 
-   ```bash
-   go mod tidy
-   ```
+After executing the API, access the /apidoc endpoint.
 
-4. アプリケーションを実行します。
+## Contribution
 
-   ```bash
-   go run .
-   ```
-
-   これにより、デフォルトで `localhost:8080` にWebサーバーが立ち上がります。
-
-## 使用方法
-
-アプリケーションが実行されているときに、ブラウザを開き `http://localhost:8080` にアクセスしてください。ユーザー認証を行い、認証が成功すると、ユーザーの42 Intra名が表示されます。
-
-## 機能
-
-- `.env` ファイルからの環境変数の読み込み
-- 42 APIを使用したOAuth認証
-- ユーザーデータの取得と表示
-- エラーハンドリング
-
-## 貢献
-
-プルリクエストはいつでも歓迎です。大きな変更を考えている場合は、まずissueを開いて話し合ってください。
-
-## ライセンス
-
-[MIT](https://choosealicense.com/licenses/mit/)
+Pull requests are always welcome, but if you're thinking of making major changes, please open an issue first to discuss it.
