@@ -30,3 +30,7 @@ After executing the API, access the /apidoc endpoint.
 ## Contribution
 
 Pull requests are always welcome, but if you're thinking of making major changes, please open an issue first to discuss it.
+
+## LICENSE
+
+[MIT](./LICENSE)
